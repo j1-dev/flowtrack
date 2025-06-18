@@ -40,7 +40,7 @@ export const AuthButtons: FC<AuthButtonsProps> = ({
     </button>
   ) : (
     <button
-      onClick={() => signIn('google')}
+      onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
       className={`${baseClasses} ${variantClasses} ${sizeClasses}`}>
       {primary ? 'Get Started' : 'Sign in with Google'}
     </button>

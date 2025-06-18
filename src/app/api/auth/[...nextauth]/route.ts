@@ -11,8 +11,14 @@ const handler = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
+  callbacks: {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async redirect({url, baseUrl }) {
+      return baseUrl + '/dashboard';
+    }
+  },
   session: {
-    strategy: 'database',
+    strategy: 'jwt',
   },
   secret: process.env.NEXTAUTH_SECRET,
 });
