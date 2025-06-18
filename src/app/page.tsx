@@ -1,100 +1,174 @@
+/**
+ * HomePage.tsx
+ * Landing page for Flowtrack with dark mode toggle and modern design
+ */
+'use client';
+
+import {
+  // useState,
+  // useEffect,
+  FC,
+} from 'react';
+// import { getSession } from 'next-auth/react';
 import { AuthButtons } from '@/components/auth-buttons';
-import Image from 'next/image';
 
-export default function Home() {
+// Feature card props
+interface FeatureCardProps {
+  title: string;
+  description: string;
+}
+
+// Price card props
+interface PriceCardProps {
+  title: string;
+  price: string;
+  features: string[];
+  highlight?: boolean;
+}
+
+const FeatureCard: FC<FeatureCardProps> = ({ title, description }) => (
+  <div className="p-6 rounded-lg bg-card shadow-lg hover:shadow-xl transition-shadow">
+    <h4 className="text-2xl font-semibold mb-2">{title}</h4>
+    <p className="text-base">{description}</p>
+  </div>
+);
+
+const PriceCard: FC<PriceCardProps> = ({
+  title,
+  price,
+  features,
+  highlight = false,
+}) => (
+  <div
+    className={`p-6 rounded-lg transition-colors ${
+      highlight
+        ? 'bg-secondary text-secondary-foreground shadow-xl'
+        : 'bg-card shadow-lg'
+    }`}>
+    <h4 className="text-2xl font-semibold mb-4">{title}</h4>
+    <p className="text-3xl font-bold mb-6">{price}</p>
+    <ul className="space-y-2 mb-6">
+      {features.map((f, i) => (
+        <li key={i}>• {f}</li>
+      ))}
+    </ul>
+    {highlight && (
+      <span className="px-4 py-2 bg-accent text-accent-foreground rounded-full">
+        Most Popular
+      </span>
+    )}
+  </div>
+);
+
+const HomePage: FC = () => {
+  // const [isDark, setIsDark] = useState(false);
+
+  // // useEffect(() => {
+  // //   const saved = localStorage.getItem('theme');
+  // //   const prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  // //   const mode = saved ? saved === 'dark' : prefers;
+  // //   setIsDark(mode);
+  // //   document.documentElement.classList.toggle('dark', mode);
+  // // }, []);
+
+  // // const toggleDark = (): void => {
+  // //   setIsDark((prev) => {
+  // //     const next = !prev;
+  // //     localStorage.setItem('theme', next ? 'dark' : 'light');
+  // //     document.documentElement.classList.toggle('dark', next);
+  // //     return next;
+  // //   });
+  // // };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{' '}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer">
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer">
-            Read our docs
-          </a>
+    <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-500">
+      <header className="flex justify-between items-center p-6 shadow-sm bg-card">
+        <h1 className="text-3xl font-bold text-primary">Flowtrack</h1>
+        <div className="flex items-center space-x-4">
+          {/* <button
+            onClick={toggleDark}
+            className="p-2 rounded-full bg-secondary hover:bg-secondary-foreground transition-colors"
+            aria-label="Toggle theme">
+            {isDark ? '🌞' : '🌙'}
+          </button> */}
+          <AuthButtons />
         </div>
+      </header>
+
+      <main className="flex-grow container mx-auto px-6 py-16">
+        {/* Hero Section */}
+        <section className="text-center mb-20">
+          <h2 className="text-5xl font-extrabold mb-4">
+            Take Control of Your Day
+          </h2>
+          <p className="text-xl max-w-2xl mx-auto">
+            Visual timeline + habit tracker + intelligent reminders—all in one
+            intuitive tool.
+          </p>
+          <div className="mt-8">
+            <AuthButtons primary />
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+          {[
+            [
+              'Drag & Drop Timeline',
+              'Visualize your day and move tasks with ease',
+            ],
+            [
+              'Smart Habit Tracker',
+              'See streaks, patterns, and stay motivated',
+            ],
+            ['Reminders & Alerts', 'Customize when and how you get notified'],
+            ['Recurring Tasks', 'Never miss routine tasks again'],
+            ['Calendar Sync', 'Integrate Google/Apple calendar'],
+            ['Analytics & Trends', 'Detailed insights into your productivity'],
+          ].map(([t, d]) => (
+            <FeatureCard key={t} title={t} description={d} />
+          ))}
+        </section>
+
+        {/* Pricing Section */}
+        <section className="text-center mb-20">
+          <h3 className="text-4xl font-bold mb-8">Choose Your Plan</h3>
+          <div className="flex flex-col md:flex-row justify-center gap-8">
+            <PriceCard
+              title="Free"
+              price="€0/mo"
+              features={[
+                'Timeline planner',
+                'Up to 3 habits',
+                'Basic reminders',
+              ]}
+            />
+            <PriceCard
+              title="Pro"
+              price="€4.99/mo"
+              features={[
+                'Unlimited habits/tasks',
+                'Calendar sync',
+                'Detailed stats',
+                'Custom alerts',
+              ]}
+              highlight
+            />
+          </div>
+        </section>
+
+        {/* Final CTA */}
+        <section className="text-center mb-12">
+          <h3 className="text-4xl font-bold mb-4">Ready to flow?</h3>
+          <AuthButtons primary big />
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer">
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer">
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer">
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-        <AuthButtons />
+
+      <footer className="p-6 text-center bg-card text-muted">
+        © {new Date().getFullYear()} Flowtrack. All rights reserved.
       </footer>
     </div>
   );
-}
+};
+
+export default HomePage;

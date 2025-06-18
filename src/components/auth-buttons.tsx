@@ -1,12 +1,48 @@
 'use client';
-import { signIn, signOut, useSession } from 'next-auth/react';
 
-export const AuthButtons = () => {
-  const { data: session } = useSession();
+import { signIn, signOut, useSession } from 'next-auth/react';
+import React, { FC } from 'react';
+
+export interface AuthButtonsProps {
+  primary?: boolean;
+  big?: boolean;
+}
+
+export const AuthButtons: FC<AuthButtonsProps> = ({
+  primary = false,
+  big = false,
+}) => {
+  const { data: session, status } = useSession();
+  const loading = status === 'loading';
+
+  const baseClasses =
+    'rounded-md font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-2';
+  const variantClasses = primary
+    ? 'bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary'
+    : 'bg-secondary text-secondary-foreground hover:bg-secondary/90 focus:ring-secondary';
+  const sizeClasses = big ? 'px-6 py-3 text-lg' : 'px-4 py-2 text-base';
+
+  if (loading) {
+    return (
+      <button
+        disabled
+        className={`${baseClasses} ${variantClasses} ${sizeClasses} opacity-50 cursor-wait`}>
+        Loading...
+      </button>
+    );
+  }
 
   return session ? (
-    <button onClick={() => signOut()}>Sign out</button>
+    <button
+      onClick={() => signOut()}
+      className={`${baseClasses} ${variantClasses} ${sizeClasses}`}>
+      Sign Out
+    </button>
   ) : (
-    <button onClick={() => signIn('google')}>Sign in with Google</button>
+    <button
+      onClick={() => signIn('google')}
+      className={`${baseClasses} ${variantClasses} ${sizeClasses}`}>
+      {primary ? 'Get Started' : 'Sign in with Google'}
+    </button>
   );
 };
