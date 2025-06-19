@@ -26,9 +26,16 @@ const DashboardPage: FC = () => {
   useEffect(() => {
     if (status === 'authenticated') {
       fetch('/api/tasks')
-        .then((res) => res.json())
+        .then(async (res) => {
+          if (!res.ok) {
+            const body = await res.json();
+            console.error('Fetch tasks failed:', res.status, body);
+            return [];
+          }
+          return res.json();
+        })
         .then((data) => setTasks(data))
-        .catch((err) => console.error(err));
+        .catch((err) => console.error('Fetch error:', err));
     }
   }, [status]);
 
