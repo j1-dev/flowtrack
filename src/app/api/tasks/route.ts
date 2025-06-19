@@ -8,8 +8,10 @@ export async function GET() {
     const user = await requireSession();
     const tasks = await getTasksByUserId(user.id);
     return NextResponse.json(tasks);
-  } catch (e) {
-    return e;
+  } catch (e: unknown) {
+    console.error('GET /api/tasks error:', e);
+    const message = e instanceof Error ? e.message : 'Internal Server Error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -24,7 +26,9 @@ export async function POST(req: Request) {
       color,
     });
     return NextResponse.json(task);
-  } catch (e) {
-    return e;
+  } catch (e: unknown) {
+    console.error('POST /api/tasks error:', e);
+    const message = e instanceof Error ? e.message : 'Internal Server Error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
