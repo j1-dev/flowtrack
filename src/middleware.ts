@@ -1,7 +1,7 @@
 // middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import { auth } from '@/lib/auth'; // Adjust path if needed
 import { isPublicPath } from '@/app/api/config';
 
 export async function middleware(request: NextRequest) {
@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 1) Skip static, _next, public files, and any explicitly public paths
+  // 1) Skip static, _next, public files, and explicitly public paths
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/static') ||
@@ -23,40 +23,35 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2) Grab the NextAuth token (session)
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
+  // 2) Use new `auth()` from Auth.js v5 to get session
+  const session = await auth();
+  const isAuthenticated = !!session;
 
   const isAuthRoute = pathname === '/login' || pathname === '/signup';
   const isApiRoute = pathname.startsWith('/api');
   const isHomeRoute = pathname === '/';
 
-  // 2a) If a signed‑in user hits '/', send them to dashboard
-  if (token && isHomeRoute) {
+  // 2a) If a signed-in user hits '/', redirect to dashboard
+  if (isAuthenticated && isHomeRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard';
     return NextResponse.redirect(url);
   }
 
-  // 3) Protect real API routes
-  if (isApiRoute) {
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    return NextResponse.next();
+  // 3) Protect API routes
+  if (isApiRoute && !isAuthenticated) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // 4) Redirect signed‑in users away from login/signup
-  if (token && isAuthRoute) {
+  // 4) Redirect signed-in users away from login/signup
+  if (isAuthenticated && isAuthRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard';
     return NextResponse.redirect(url);
   }
 
-  // 5) Redirect unauthenticated users from protected pages to login
-  if (!token && !isAuthRoute && !isHomeRoute) {
+  // 5) Redirect unauthenticated users from protected pages
+  if (!isAuthenticated && !isAuthRoute && !isHomeRoute && !isApiRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/';
     url.searchParams.set('next', pathname);
