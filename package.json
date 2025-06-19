@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "postinstall": "prisma generate",
     "dev": "sudo docker compose up -d & next dev --turbopack",
-    "build": "npx prisma generate && next build",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build",
+    "build": "npm run vercel-build",
     "start": "next start",
     "lint": "next lint"
   },
