@@ -14,7 +14,8 @@ const DashboardPage: FC = () => {
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [color, setColor] = useState('');
-  const [tasks, setTasks] = useState<Task[]|[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [view, setView] = useState<'day' | 'week' | 'month'>('day');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -45,6 +46,30 @@ const DashboardPage: FC = () => {
     setEndTime('');
     setColor('');
   };
+
+  const handleDelete = async (id: string) => {
+    await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const filteredTasks = tasks.filter((task: Task) => {
+    const now = new Date();
+    const taskStart = new Date(task.startTime);
+    if (view === 'day') {
+      return taskStart.toDateString() === now.toDateString();
+    } else if (view === 'week') {
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - now.getDay());
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 7);
+      return taskStart >= weekStart && taskStart < weekEnd;
+    } else {
+      return (
+        taskStart.getMonth() === now.getMonth() &&
+        taskStart.getFullYear() === now.getFullYear()
+      );
+    }
+  });
 
   if (status === 'loading') {
     return (
@@ -112,16 +137,54 @@ const DashboardPage: FC = () => {
 
           {/* Task List - 2/3 width */}
           <div className="md:col-span-2 p-4 bg-card rounded-lg shadow">
-            <h3 className="font-medium mb-4">Your Tasks for Today</h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-medium">Your Tasks</h3>
+              <div className="space-x-2">
+                <button
+                  onClick={() => setView('day')}
+                  className={`px-2 py-1 rounded ${
+                    view === 'day' ? 'bg-primary text-white' : 'bg-muted'
+                  }`}>
+                  Day
+                </button>
+                <button
+                  onClick={() => setView('week')}
+                  className={`px-2 py-1 rounded ${
+                    view === 'week' ? 'bg-primary text-white' : 'bg-muted'
+                  }`}>
+                  Week
+                </button>
+                <button
+                  onClick={() => setView('month')}
+                  className={`px-2 py-1 rounded ${
+                    view === 'month' ? 'bg-primary text-white' : 'bg-muted'
+                  }`}>
+                  Month
+                </button>
+              </div>
+            </div>
+
             <ul className="space-y-2">
-              {tasks.map((task: Task) => (
-                <li key={task.id} className="p-3 rounded border bg-muted">
-                  <strong>{task.title}</strong>
-                  <br />
-                  <span>
-                    {new Date(task.startTime).toLocaleString()} -{' '}
-                    {new Date(task.endTime).toLocaleString()}
-                  </span>
+              {filteredTasks.map((task: Task) => (
+                <li
+                  key={task.id}
+                  className="p-3 rounded border"
+                  style={{ backgroundColor: task.color || '#f0f0f0' }}>
+                  <div className="flex justify-between">
+                    <div>
+                      <strong>{task.title}</strong>
+                      <br />
+                      <span>
+                        {new Date(task.startTime).toLocaleString()} -{' '}
+                        {new Date(task.endTime).toLocaleString()}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleDelete(task.id)}
+                      className="text-sm text-red-500">
+                      Delete
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
