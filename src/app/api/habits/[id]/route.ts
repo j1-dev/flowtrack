@@ -8,18 +8,21 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
-  try {
-    const user = await requireSession();
-    await verifyOwnership('habit', id, user.id);
-    const { name, frequency, streak } = await request.json();
-    const updated = await updateHabitById(id, { name, frequency, streak });
-    return NextResponse.json(updated);
-  } catch (e: unknown) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : e },
-      { status: 500 }
-    );
+  const userOrResponse = await requireSession();
+  if (!(typeof userOrResponse !== 'object' || 'id' in userOrResponse)) {
+    return userOrResponse;
   }
+  const verify = await verifyOwnership('habit', id, userOrResponse.id);
+  if (!(typeof verify !== 'object' || 'userId' in verify)) {
+    return verify;
+  }
+  const { name, frequency, streak } = await request.json();
+  const updated = await updateHabitById(id, {
+    name,
+    frequency,
+    streak,
+  });
+  return NextResponse.json(updated);
 }
 
 export async function DELETE(
@@ -27,15 +30,14 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
-  try {
-    const user = await requireSession();
-    await verifyOwnership('habit', id, user.id);
-    await deleteHabitById(id);
-    return NextResponse.json({ success: true });
-  } catch (e: unknown) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : e },
-      { status: 500 }
-    );
+  const userOrResponse = await requireSession();
+  if (!(typeof userOrResponse !== 'object' || 'id' in userOrResponse)) {
+    return userOrResponse;
   }
+  const verify = await verifyOwnership('habit', id, userOrResponse.id);
+  if (!(typeof verify !== 'object' || 'userId' in verify)) {
+    return verify;
+  }
+  await deleteHabitById(id);
+  return NextResponse.json({ success: true });
 }
