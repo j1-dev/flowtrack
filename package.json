@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "sudo docker compose up -d & next dev --turbopack",
-    "build": "next build",
+    "build": "npx prisma generate && next build",
     "start": "next start",
     "lint": "next lint"
   },
