@@ -216,7 +216,14 @@ const CalendarDayView = () => {
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!calendarRef.current) return;
     const rect = calendarRef.current.getBoundingClientRect();
-    setCursorY(e.clientY - rect.top);
+    let y = e.clientY - rect.top;
+    // Snap to nearest 15 minutes
+    const percent = Math.max(0, Math.min(1, y / rect.height));
+    const minutes = Math.round(percent * 24 * 60);
+    const snappedMinutes = Math.round(minutes / 15) * 15;
+    const snappedPercent = snappedMinutes / (24 * 60);
+    y = snappedPercent * rect.height;
+    setCursorY(y);
   };
 
   // Mouse leave handler to hide cursor
@@ -238,7 +245,9 @@ const CalendarDayView = () => {
           const rect = calendarRef.current.getBoundingClientRect();
           const y = e.clientY - rect.top;
           const percent = Math.max(0, Math.min(1, y / rect.height));
-          const minutes = Math.round(percent * 24 * 60);
+          let minutes = Math.round(percent * 24 * 60);
+          // Snap to nearest 15 minutes
+          minutes = Math.round(minutes / 15) * 15;
           const clicked = new Date(date);
           clicked.setHours(0, 0, 0, 0);
           clicked.setMinutes(minutes);
@@ -342,9 +351,16 @@ const CalendarWeekView = () => {
                 onMouseMove={(e) => {
                   const rect = columnRefs.current[i]?.getBoundingClientRect();
                   if (!rect) return;
+                  let y = e.clientY - rect.top;
+                  // Snap to nearest 15 minutes
+                  const percent = Math.max(0, Math.min(1, y / rect.height));
+                  const minutes = Math.round(percent * 24 * 60);
+                  const snappedMinutes = Math.round(minutes / 15) * 15;
+                  const snappedPercent = snappedMinutes / (24 * 60);
+                  y = snappedPercent * rect.height;
                   setCursorY((prev) => {
                     const next = [...prev];
-                    next[i] = e.clientY - rect.top;
+                    next[i] = y;
                     return next;
                   });
                 }}
@@ -360,7 +376,9 @@ const CalendarWeekView = () => {
                   if (!rect) return;
                   const y = e.clientY - rect.top;
                   const percent = Math.max(0, Math.min(1, y / rect.height));
-                  const minutes = Math.round(percent * 24 * 60);
+                  let minutes = Math.round(percent * 24 * 60);
+                  // Snap to nearest 15 minutes
+                  minutes = Math.round(minutes / 15) * 15;
                   const clicked = new Date(headerDays[i]);
                   clicked.setHours(0, 0, 0, 0);
                   clicked.setMinutes(minutes);
