@@ -114,7 +114,6 @@ const Calendar = ({
   events: defaultEvents = [],
   onChangeView,
 }: CalendarProps) => {
-
   const [view, setView] = useState<View>(_defaultMode);
   const [date, setDate] = useState(defaultDate);
   // Remove internal events state, use prop instead
