@@ -141,7 +141,26 @@ const DashboardPage: FC = () => {
             events={events}
             onChangeView={() => {}}
             onEventClick={(event) => {
-              setEditingTask(event);
+              console.log('[DEBUG] onEventClick', event);
+              // Pass CalendarEvent directly for editing
+              setEditingTask({
+                id: event.id,
+                title: event.title,
+                color: event.color,
+                start: event.start,
+                end: event.end,
+              });
+              setModalOpen(true);
+            }}
+            onCreateAtTime={(date) => {
+              console.log('[DEBUG] onCreateAtTime', date);
+              setEditingTask({
+                id: '',
+                title: '',
+                start: date,
+                end: new Date(date.getTime() + 60 * 60 * 1000), // default 1 hour
+                color: '#6366f1',
+              });
               setModalOpen(true);
             }}>
             {/* Responsive calendar header row */}

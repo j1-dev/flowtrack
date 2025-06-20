@@ -1,5 +1,13 @@
 'use client';
 
+import React, {
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  forwardRef,
+  useRef,
+} from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
@@ -25,15 +33,6 @@ import {
   subYears,
 } from 'date-fns';
 import { enUS } from 'date-fns/locale/en-US';
-import {
-  ReactNode,
-  createContext,
-  forwardRef,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 type View = 'day' | 'week' | 'month' | 'year';
@@ -50,9 +49,10 @@ type ContextType = {
   onEventClick?: (event: CalendarEvent) => void;
   enableHotkeys?: boolean;
   today: Date;
+  onCreateAtTime?: (date: Date) => void;
 };
 
-const Context = createContext<ContextType>({} as ContextType);
+const Context = React.createContext<ContextType>({} as ContextType);
 
 export type CalendarEvent = {
   id: string;
@@ -63,7 +63,7 @@ export type CalendarEvent = {
 };
 
 type CalendarProps = {
-  children: ReactNode;
+  children: React.ReactNode;
   defaultDate?: Date;
   events?: CalendarEvent[];
   view?: View;
@@ -71,6 +71,7 @@ type CalendarProps = {
   enableHotkeys?: boolean;
   onChangeView?: (view: View) => void;
   onEventClick?: (event: CalendarEvent) => void;
+  onCreateAtTime?: (date: Date) => void;
 };
 
 const Calendar = ({
@@ -82,6 +83,7 @@ const Calendar = ({
   onEventClick,
   events: defaultEvents = [],
   onChangeView,
+  onCreateAtTime,
 }: CalendarProps) => {
   const [view, setView] = useState<View>(_defaultMode);
   const [date, setDate] = useState(defaultDate);
@@ -126,6 +128,7 @@ const Calendar = ({
         onEventClick,
         onChangeView,
         today: new Date(),
+        onCreateAtTime,
       }}>
       {children}
     </Context.Provider>
@@ -166,6 +169,7 @@ const EventGroup = ({
   events: CalendarEvent[];
   hour: Date;
 }) => {
+  const { onEventClick } = useCalendar();
   return (
     <div className="h-20 border-t last:border-b">
       {events
@@ -177,6 +181,10 @@ const EventGroup = ({
 
           return (
             <div
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onEventClick) onEventClick(event);
+              }}
               key={event.id}
               className="relative font-bold border-l-4 rounded p-2 text-xs"
               style={{
@@ -195,16 +203,62 @@ const EventGroup = ({
 };
 
 const CalendarDayView = () => {
-  const { view, events, date } = useCalendar();
+  const { view, events, date, onCreateAtTime } = useCalendar();
+
+  const [cursorY, setCursorY] = React.useState<number | null>(null);
+  const calendarRef = React.useRef<HTMLDivElement>(null);
 
   if (view !== 'day') return null;
 
   const hours = [...Array(24)].map((_, i) => setHours(date, i));
 
+  // Mouse move handler to update cursorY
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!calendarRef.current) return;
+    const rect = calendarRef.current.getBoundingClientRect();
+    setCursorY(e.clientY - rect.top);
+  };
+
+  // Mouse leave handler to hide cursor
+  const handleMouseLeave = () => {
+    setCursorY(null);
+  };
+
   return (
     <div className="flex relative pt-2 overflow-auto h-full">
       <TimeTable />
-      <div className="flex-1">
+      <div
+        className="flex-1 relative"
+        ref={calendarRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={{ cursor: 'pointer' }}
+        onClick={(e) => {
+          if (!calendarRef.current) return;
+          const rect = calendarRef.current.getBoundingClientRect();
+          const y = e.clientY - rect.top;
+          const percent = Math.max(0, Math.min(1, y / rect.height));
+          const minutes = Math.round(percent * 24 * 60);
+          const clicked = new Date(date);
+          clicked.setHours(0, 0, 0, 0);
+          clicked.setMinutes(minutes);
+          onCreateAtTime?.(clicked);
+        }}>
+        {/* Mouse-following horizontal line */}
+        {cursorY !== null && (
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              top: cursorY,
+              height: 2,
+              background: 'rgba(59,130,246,0.7)', // blue-500
+              zIndex: 20,
+              pointerEvents: 'none',
+            }}
+          />
+        )}
         {hours.map((hour) => (
           <EventGroup key={hour.toString()} hour={hour} events={events} />
         ))}
@@ -214,7 +268,7 @@ const CalendarDayView = () => {
 };
 
 const CalendarWeekView = () => {
-  const { view, date, locale, events } = useCalendar();
+  const { view, date, locale, events, onCreateAtTime } = useCalendar();
 
   const weekDates = useMemo(() => {
     const start = startOfWeek(date, { weekStartsOn: 0 });
@@ -237,6 +291,12 @@ const CalendarWeekView = () => {
     }
     return daysOfWeek;
   }, [date]);
+
+  // --- Mouse-following line state for each column ---
+  const [cursorY, setCursorY] = useState<(number | null)[]>(() =>
+    Array(7).fill(null)
+  );
+  const columnRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   if (view !== 'week') return null;
 
@@ -275,7 +335,53 @@ const CalendarWeekView = () => {
                   'h-full text-sm text-muted-foreground border-l first:border-l-0',
                   [0, 6].includes(i) && 'bg-muted/50'
                 )}
-                key={hours[0].toString()}>
+                key={hours[0].toString()}
+                ref={(el) => {
+                  columnRefs.current[i] = el;
+                }}
+                onMouseMove={(e) => {
+                  const rect = columnRefs.current[i]?.getBoundingClientRect();
+                  if (!rect) return;
+                  setCursorY((prev) => {
+                    const next = [...prev];
+                    next[i] = e.clientY - rect.top;
+                    return next;
+                  });
+                }}
+                onMouseLeave={() => {
+                  setCursorY((prev) => {
+                    const next = [...prev];
+                    next[i] = null;
+                    return next;
+                  });
+                }}
+                onClick={(e) => {
+                  const rect = columnRefs.current[i]?.getBoundingClientRect();
+                  if (!rect) return;
+                  const y = e.clientY - rect.top;
+                  const percent = Math.max(0, Math.min(1, y / rect.height));
+                  const minutes = Math.round(percent * 24 * 60);
+                  const clicked = new Date(headerDays[i]);
+                  clicked.setHours(0, 0, 0, 0);
+                  clicked.setMinutes(minutes);
+                  onCreateAtTime?.(clicked);
+                }}
+                style={{ position: 'relative', cursor: 'pointer' }}>
+                {/* Mouse-following horizontal line for this column */}
+                {cursorY[i] !== null && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      right: 0,
+                      top: cursorY[i]!,
+                      height: 2,
+                      background: 'rgba(59,130,246,0.7)', // blue-500
+                      zIndex: 20,
+                      pointerEvents: 'none',
+                    }}
+                  />
+                )}
                 {hours.map((hour) => (
                   <EventGroup
                     key={hour.toString()}
