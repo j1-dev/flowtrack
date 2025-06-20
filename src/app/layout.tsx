@@ -38,7 +38,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${helveticaNeue.className}`}>
         <ThemeProvider attribute="class">
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
           <div className="z-50 fixed bottom-5 right-5">
             <ThemeSwitcher />
           </div>
