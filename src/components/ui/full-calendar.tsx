@@ -2,7 +2,6 @@
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { VariantProps, cva } from 'class-variance-authority';
 import {
   Locale,
   addDays,
@@ -37,36 +36,6 @@ import {
 } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
-const monthEventVariants = cva('size-2 rounded-full', {
-  variants: {
-    variant: {
-      default: 'bg-primary',
-      blue: 'bg-blue-500',
-      green: 'bg-green-500',
-      pink: 'bg-pink-500',
-      purple: 'bg-purple-500',
-    },
-  },
-  defaultVariants: {
-    variant: 'default',
-  },
-});
-
-const dayEventVariants = cva('font-bold border-l-4 rounded p-2 text-xs', {
-  variants: {
-    variant: {
-      default: 'bg-muted/30 text-muted-foreground border-muted',
-      blue: 'bg-blue-500/30 text-blue-600 border-blue-500',
-      green: 'bg-green-500/30 text-green-600 border-green-500',
-      pink: 'bg-pink-500/30 text-pink-600 border-pink-500',
-      purple: 'bg-purple-500/30 text-purple-600 border-purple-500',
-    },
-  },
-  defaultVariants: {
-    variant: 'default',
-  },
-});
-
 type View = 'day' | 'week' | 'month' | 'year';
 
 type ContextType = {
@@ -90,7 +59,7 @@ export type CalendarEvent = {
   start: Date;
   end: Date;
   title: string;
-  color?: VariantProps<typeof monthEventVariants>['variant'];
+  color?: string; // Now a hex color code
 };
 
 type CalendarProps = {
@@ -118,7 +87,9 @@ const Calendar = ({
   const [date, setDate] = useState(defaultDate);
   // Remove internal events state, use prop instead
   const events = defaultEvents;
-  const setEvents = () => { throw new Error('setEvents is not supported when using controlled events'); };
+  const setEvents = () => {
+    throw new Error('setEvents is not supported when using controlled events');
+  };
 
   const changeView = (view: View) => {
     setView(view);
@@ -168,7 +139,7 @@ const CalendarViewTrigger = forwardRef<
   React.HTMLAttributes<HTMLButtonElement> & {
     view: View;
   }
->(( { children, view, ...props }, ref ) => {
+>(({ children, view, ...props }, ref) => {
   const { view: currentView, setView, onChangeView } = useCalendar();
 
   return (
@@ -207,13 +178,13 @@ const EventGroup = ({
           return (
             <div
               key={event.id}
-              className={cn(
-                'relative',
-                dayEventVariants({ variant: event.color })
-              )}
+              className="relative font-bold border-l-4 rounded p-2 text-xs"
               style={{
                 top: `${startPosition * 100}%`,
                 height: `${hoursDifference * 100}%`,
+                backgroundColor: `${event.color}4D`, // hex + opacity (e.g. 4D = 30%)
+                color: `${event.color}`,
+                borderLeftColor: `${event.color}`,
               }}>
               {event.title}
             </div>
@@ -370,10 +341,17 @@ const CalendarMonthView = () => {
                     key={event.id}
                     className="px-1 rounded text-sm flex items-center gap-1">
                     <div
-                      className={cn(
-                        'shrink-0',
-                        monthEventVariants({ variant: event.color })
-                      )}></div>
+                      className={cn('shrink-0')}
+                      style={
+                        event.color && event.color.startsWith('#')
+                          ? {
+                              background: event.color,
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                            }
+                          : undefined
+                      }></div>
                     <span className="flex-1 truncate">{event.title}</span>
                     <time className="tabular-nums text-muted-foreground/50 text-xs">
                       {format(event.start, 'HH:mm')}

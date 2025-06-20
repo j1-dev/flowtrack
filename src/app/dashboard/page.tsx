@@ -45,19 +45,19 @@ const DashboardPage: FC = () => {
             start: new Date(task.startTime),
             end: new Date(task.endTime),
             title: task.title,
-            color: 'default',
+            color: task.color,
           }))
         );
       });
   }, []);
 
   // Optionally keep for debugging
-  // useEffect(() => { console.log(events); }, [events]);
+  useEffect(() => {
+    console.log(events);
+  }, [events]);
 
-  const handleSaveTask = async (
-    task: Omit<CalendarEvent, 'id'> & { id?: string }
-  ) => {
-    if (!task.title || !task.start || !task.end) return;
+  const handleSaveTask = async (task: Task) => {
+    if (!task.title || !task.startTime || !task.endTime) return;
     if (task.id) {
       // Edit existing
       const res = await fetch(`/api/tasks/${task.id}`, {
@@ -147,7 +147,9 @@ const DashboardPage: FC = () => {
             {/* Responsive calendar header row */}
             <div className="flex flex-col md:flex-row md:items-center md:gap-2 mb-4">
               {/* Desktop: all triggers and right-aligned actions in one row */}
-              <div className="hidden md:flex items-center w-full gap-2 overflow-x-auto scrollbar-none -mx-2 px-2 md:mx-0 md:px-0" style={{ WebkitOverflowScrolling: 'touch' }}>
+              <div
+                className="hidden md:flex items-center w-full gap-2 overflow-x-auto scrollbar-none -mx-2 px-2 md:mx-0 md:px-0"
+                style={{ WebkitOverflowScrolling: 'touch' }}>
                 <CalendarPrevTrigger>{'<'}</CalendarPrevTrigger>
                 <CalendarTodayTrigger>Today</CalendarTodayTrigger>
                 <CalendarNextTrigger>{'>'}</CalendarNextTrigger>
@@ -171,7 +173,9 @@ const DashboardPage: FC = () => {
                 </div>
               </div>
               {/* Mobile: nav triggers row */}
-              <div className="flex md:hidden items-center gap-1 overflow-x-auto scrollbar-none -mx-2 px-2" style={{ WebkitOverflowScrolling: 'touch' }}>
+              <div
+                className="flex md:hidden items-center gap-1 overflow-x-auto scrollbar-none -mx-2 px-2"
+                style={{ WebkitOverflowScrolling: 'touch' }}>
                 <CalendarPrevTrigger>{'<'}</CalendarPrevTrigger>
                 <CalendarTodayTrigger>Today</CalendarTodayTrigger>
                 <CalendarNextTrigger>{'>'}</CalendarNextTrigger>
@@ -180,7 +184,9 @@ const DashboardPage: FC = () => {
                 </span>
               </div>
               {/* Mobile: view triggers row */}
-              <div className="flex md:hidden items-center gap-1 mt-2 overflow-x-auto scrollbar-none -mx-2 px-2" style={{ WebkitOverflowScrolling: 'touch' }}>
+              <div
+                className="flex md:hidden items-center gap-1 mt-2 overflow-x-auto scrollbar-none -mx-2 px-2"
+                style={{ WebkitOverflowScrolling: 'touch' }}>
                 <CalendarViewTrigger view="day">Day</CalendarViewTrigger>
                 <CalendarViewTrigger view="week">Week</CalendarViewTrigger>
                 <CalendarViewTrigger view="month">Month</CalendarViewTrigger>
