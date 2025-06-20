@@ -98,6 +98,23 @@ const DashboardPage: FC = () => {
     setModalOpen(false);
   };
 
+  const handleEventDrop = (event: CalendarEvent, newStart: Date) => {
+    const duration = event.end.getTime() - event.start.getTime();
+    // Ensure newStart uses the original event's date, only updating the time
+    const correctedStart = new Date(newStart);
+    correctedStart.setHours(newStart.getHours(), newStart.getMinutes(), 0, 0);
+    const newEnd = new Date(correctedStart.getTime() + duration);
+    // Update event in state and persist to backend
+    const updatedTask = {
+      id: event.id,
+      title: event.title,
+      color: event.color,
+      startTime: correctedStart,
+      endTime: newEnd,
+    };
+    handleSaveTask(updatedTask as Task); // handleSaveTask expects Task shape
+  };
+
   // const handleDelete = async (id: string) => {
   //   await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
   //   setEvents((prev) => prev.filter((e) => e.id !== id));
@@ -142,7 +159,6 @@ const DashboardPage: FC = () => {
             onChangeView={() => {}}
             onEventClick={(event) => {
               console.log('[DEBUG] onEventClick', event);
-              // Pass CalendarEvent directly for editing
               setEditingTask({
                 id: event.id,
                 title: event.title,
@@ -158,11 +174,12 @@ const DashboardPage: FC = () => {
                 id: '',
                 title: '',
                 start: date,
-                end: new Date(date.getTime() + 60 * 60 * 1000), // default 1 hour
+                end: new Date(date.getTime() + 60 * 60 * 1000),
                 color: '#6366f1',
               });
               setModalOpen(true);
-            }}>
+            }}
+            onEventDrop={handleEventDrop}>
             {/* Responsive calendar header row */}
             <div className="flex flex-col md:flex-row md:items-center md:gap-2 mb-4">
               {/* Desktop: all triggers and right-aligned actions in one row */}

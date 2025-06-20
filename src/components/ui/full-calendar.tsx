@@ -50,6 +50,7 @@ type ContextType = {
   enableHotkeys?: boolean;
   today: Date;
   onCreateAtTime?: (date: Date) => void;
+  onEventDrop?: (event: CalendarEvent, newStart: Date) => void;
 };
 
 const Context = React.createContext<ContextType>({} as ContextType);
@@ -72,6 +73,7 @@ type CalendarProps = {
   onChangeView?: (view: View) => void;
   onEventClick?: (event: CalendarEvent) => void;
   onCreateAtTime?: (date: Date) => void;
+  onEventDrop?: (event: CalendarEvent, newStart: Date) => void;
 };
 
 const Calendar = ({
@@ -84,6 +86,7 @@ const Calendar = ({
   events: defaultEvents = [],
   onChangeView,
   onCreateAtTime,
+  onEventDrop,
 }: CalendarProps) => {
   const [view, setView] = useState<View>(_defaultMode);
   const [date, setDate] = useState(defaultDate);
@@ -129,6 +132,7 @@ const Calendar = ({
         onChangeView,
         today: new Date(),
         onCreateAtTime,
+        onEventDrop,
       }}>
       {children}
     </Context.Provider>
@@ -181,16 +185,21 @@ const EventGroup = ({
 
           return (
             <div
+              draggable
+              onDragStart={(e) => {
+                e.dataTransfer.setData('event-id', event.id);
+                e.dataTransfer.effectAllowed = 'move';
+              }}
               onClick={(e) => {
                 e.stopPropagation();
                 if (onEventClick) onEventClick(event);
               }}
               key={event.id}
-              className="relative font-bold border-l-4 rounded p-2 text-xs"
+              className="relative font-bold border-l-4 rounded p-2 text-xs cursor-move"
               style={{
                 top: `${startPosition * 100}%`,
                 height: `${hoursDifference * 100}%`,
-                backgroundColor: `${event.color}4D`, // hex + opacity (e.g. 4D = 30%)
+                backgroundColor: `${event.color}4D`,
                 color: `${event.color}`,
                 borderLeftColor: `${event.color}`,
               }}>
@@ -203,9 +212,10 @@ const EventGroup = ({
 };
 
 const CalendarDayView = () => {
-  const { view, events, date, onCreateAtTime } = useCalendar();
+  const { view, events, date, onCreateAtTime, onEventDrop } = useCalendar();
 
   const [cursorY, setCursorY] = React.useState<number | null>(null);
+  const [dragOverY, setDragOverY] = React.useState<number | null>(null);
   const calendarRef = React.useRef<HTMLDivElement>(null);
 
   if (view !== 'day') return null;
@@ -232,10 +242,10 @@ const CalendarDayView = () => {
   };
 
   return (
-    <div className="flex relative pt-2 overflow-auto h-full">
+    <div className="flex relative pt-2 overflow-auto">
       <TimeTable />
       <div
-        className="flex-1 relative"
+        className="flex-1 relative h-full"
         ref={calendarRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -252,6 +262,40 @@ const CalendarDayView = () => {
           clicked.setHours(0, 0, 0, 0);
           clicked.setMinutes(minutes);
           onCreateAtTime?.(clicked);
+        }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          if (!calendarRef.current) return;
+          const rect = calendarRef.current.getBoundingClientRect();
+          let y = e.clientY - rect.top;
+          // Snap to nearest 15 minutes
+          const percent = Math.max(0, Math.min(1, y / rect.height));
+          const minutes = Math.round(percent * 24 * 60);
+          const snappedMinutes = Math.round(minutes / 15) * 15;
+          const snappedPercent = snappedMinutes / (24 * 60);
+          y = snappedPercent * rect.height;
+          setDragOverY(y);
+        }}
+        onDragLeave={() => setDragOverY(null)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOverY(null);
+          const eventId = e.dataTransfer.getData('event-id');
+          if (!eventId) return;
+          const rect = calendarRef.current?.getBoundingClientRect();
+          if (!rect) return;
+          const y = e.clientY - rect.top;
+          const percent = Math.max(0, Math.min(1, y / rect.height));
+          let minutes = Math.round(percent * 24 * 60);
+          // Snap to nearest 15 minutes
+          minutes = Math.round(minutes / 15) * 15;
+          const newStart = new Date(date);
+          newStart.setHours(0, 0, 0, 0);
+          newStart.setMinutes(minutes);
+          const event = events.find((ev) => ev.id === eventId);
+          if (event && onEventDrop) {
+            onEventDrop(event, newStart);
+          }
         }}>
         {/* Mouse-following horizontal line */}
         {cursorY !== null && (
@@ -268,6 +312,21 @@ const CalendarDayView = () => {
             }}
           />
         )}
+        {/* Drop indicator while dragging */}
+        {dragOverY !== null && (
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              top: dragOverY,
+              height: 4,
+              background: 'rgba(16,185,129,0.7)', // green-500
+              zIndex: 30,
+              pointerEvents: 'none',
+            }}
+          />
+        )}
         {hours.map((hour) => (
           <EventGroup key={hour.toString()} hour={hour} events={events} />
         ))}
@@ -277,7 +336,8 @@ const CalendarDayView = () => {
 };
 
 const CalendarWeekView = () => {
-  const { view, date, locale, events, onCreateAtTime } = useCalendar();
+  const { view, date, locale, events, onCreateAtTime, onEventDrop } =
+    useCalendar();
 
   const weekDates = useMemo(() => {
     const start = startOfWeek(date, { weekStartsOn: 0 });
@@ -303,6 +363,9 @@ const CalendarWeekView = () => {
 
   // --- Mouse-following line state for each column ---
   const [cursorY, setCursorY] = useState<(number | null)[]>(() =>
+    Array(7).fill(null)
+  );
+  const [dragOverY, setDragOverY] = useState<(number | null)[]>(() =>
     Array(7).fill(null)
   );
   const columnRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -370,6 +433,11 @@ const CalendarWeekView = () => {
                     next[i] = null;
                     return next;
                   });
+                  setDragOverY((prev) => {
+                    const next = [...prev];
+                    next[i] = null;
+                    return next;
+                  });
                 }}
                 onClick={(e) => {
                   const rect = columnRefs.current[i]?.getBoundingClientRect();
@@ -379,10 +447,83 @@ const CalendarWeekView = () => {
                   let minutes = Math.round(percent * 24 * 60);
                   // Snap to nearest 15 minutes
                   minutes = Math.round(minutes / 15) * 15;
-                  const clicked = new Date(headerDays[i]);
-                  clicked.setHours(0, 0, 0, 0);
+                  const clicked = new Date(
+                    headerDays[i].getFullYear(),
+                    headerDays[i].getMonth(),
+                    headerDays[i].getDate(),
+                    0,
+                    0,
+                    0,
+                    0
+                  );
                   clicked.setMinutes(minutes);
                   onCreateAtTime?.(clicked);
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  const rect = columnRefs.current[i]?.getBoundingClientRect();
+                  if (!rect) return;
+                  let y = e.clientY - rect.top;
+                  // Snap to nearest 15 minutes
+                  const percent = Math.max(0, Math.min(1, y / rect.height));
+                  const minutes = Math.round(percent * 24 * 60);
+                  const snappedMinutes = Math.round(minutes / 15) * 15;
+                  const snappedPercent = snappedMinutes / (24 * 60);
+                  y = snappedPercent * rect.height;
+                  setDragOverY((prev) => {
+                    const next = [...prev];
+                    next[i] = y;
+                    return next;
+                  });
+                }}
+                onDragLeave={() => {
+                  setDragOverY((prev) => {
+                    const next = [...prev];
+                    next[i] = null;
+                    return next;
+                  });
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOverY((prev) => {
+                    const next = [...prev];
+                    next[i] = null;
+                    return next;
+                  });
+                  const eventId = e.dataTransfer.getData('event-id');
+                  if (!eventId) return;
+                  const rect = columnRefs.current[i]?.getBoundingClientRect();
+                  if (!rect) return;
+                  const y = e.clientY - rect.top;
+                  const percent = Math.max(0, Math.min(1, y / rect.height));
+                  let minutes = Math.round(percent * 24 * 60);
+                  // Snap to nearest 15 minutes
+                  minutes = Math.round(minutes / 15) * 15;
+                  const newStart = new Date(
+                    headerDays[i].getFullYear(),
+                    headerDays[i].getMonth(),
+                    headerDays[i].getDate(),
+                    0,
+                    0,
+                    0,
+                    0
+                  );
+                  newStart.setMinutes(minutes);
+                  const event = events.find((ev) => ev.id === eventId);
+                  // Debug logs
+                  console.log(
+                    '[WEEK DROP] eventId:',
+                    eventId,
+                    'column:',
+                    i,
+                    'newStart:',
+                    newStart,
+                    'event:',
+                    event
+                  );
+                  if (event && onEventDrop) {
+                    onEventDrop(event, newStart);
+                  }
                 }}
                 style={{ position: 'relative', cursor: 'pointer' }}>
                 {/* Mouse-following horizontal line for this column */}
@@ -396,6 +537,21 @@ const CalendarWeekView = () => {
                       height: 2,
                       background: 'rgba(59,130,246,0.7)', // blue-500
                       zIndex: 20,
+                      pointerEvents: 'none',
+                    }}
+                  />
+                )}
+                {/* Drop indicator while dragging */}
+                {dragOverY[i] !== null && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      right: 0,
+                      top: dragOverY[i]!,
+                      height: 4,
+                      background: 'rgba(16,185,129,0.7)', // green-500
+                      zIndex: 30,
                       pointerEvents: 'none',
                     }}
                   />
@@ -417,11 +573,11 @@ const CalendarWeekView = () => {
 };
 
 const CalendarMonthView = () => {
-  const { date, view, events, locale } = useCalendar();
-
+  // State for drop indicator
+  const [dragOverDate, setDragOverDate] = React.useState<Date | null>(null);
+  const { date, view, events, locale, onEventDrop } = useCalendar();
   const monthDates = useMemo(() => getDaysInMonth(date), [date]);
   const weekDays = useMemo(() => generateWeekdays(locale), [locale]);
-
   if (view !== 'month') return null;
 
   return (
@@ -447,10 +603,37 @@ const CalendarMonthView = () => {
           return (
             <div
               className={cn(
-                'ring-1 p-2 text-sm text-muted-foreground ring-border overflow-auto',
-                !isSameMonth(date, _date) && 'text-muted-foreground/50'
+                'ring-1 p-2 text-sm text-muted-foreground ring-border overflow-auto group relative',
+                !isSameMonth(date, _date) && 'text-muted-foreground/50',
+                dragOverDate &&
+                  isSameDay(dragOverDate, _date) &&
+                  'ring-2 ring-green-500 z-10'
               )}
-              key={_date.toString()}>
+              key={_date.toString()}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragOverDate(_date);
+              }}
+              onDragLeave={() => {
+                setDragOverDate(null);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragOverDate(null);
+                const eventId = e.dataTransfer.getData('event-id');
+                if (!eventId) return;
+                const event = events.find((ev) => ev.id === eventId);
+                if (!event || !onEventDrop) return;
+                // Move event to this day, preserving time of day
+                const newStart = new Date(_date);
+                newStart.setHours(
+                  event.start.getHours(),
+                  event.start.getMinutes(),
+                  0,
+                  0
+                );
+                onEventDrop(event, newStart);
+              }}>
               <span
                 className={cn(
                   'size-6 grid place-items-center rounded-full mb-1 sticky top-0',
@@ -463,7 +646,12 @@ const CalendarMonthView = () => {
                 return (
                   <div
                     key={event.id}
-                    className="px-1 rounded text-sm flex items-center gap-1">
+                    className="px-1 rounded text-sm flex items-center gap-1 cursor-move"
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('event-id', event.id);
+                      e.dataTransfer.effectAllowed = 'move';
+                    }}>
                     <div
                       className={cn('shrink-0')}
                       style={
