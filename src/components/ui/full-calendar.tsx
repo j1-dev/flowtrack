@@ -114,9 +114,12 @@ const Calendar = ({
   events: defaultEvents = [],
   onChangeView,
 }: CalendarProps) => {
+
   const [view, setView] = useState<View>(_defaultMode);
   const [date, setDate] = useState(defaultDate);
-  const [events, setEvents] = useState<CalendarEvent[]>(defaultEvents);
+  // Remove internal events state, use prop instead
+  const events = defaultEvents;
+  const setEvents = () => { throw new Error('setEvents is not supported when using controlled events'); };
 
   const changeView = (view: View) => {
     setView(view);
