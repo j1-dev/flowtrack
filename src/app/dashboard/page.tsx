@@ -5,17 +5,31 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthButtons } from '@/components/auth-buttons';
 import { ThemeSwitcher } from '@/components/theme-switcher';
+import {
+  Calendar,
+  CalendarCurrentDate,
+  CalendarDayView,
+  CalendarMonthView,
+  CalendarNextTrigger,
+  CalendarPrevTrigger,
+  CalendarTodayTrigger,
+  CalendarViewTrigger,
+  CalendarWeekView,
+  CalendarYearView,
+} from '@/components/ui/full-calendar';
+import { type CalendarEvent } from '@/components/ui/full-calendar';
 import { Task } from '@/lib/types';
 
 const DashboardPage: FC = () => {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
-  const [color, setColor] = useState('');
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [view, setView] = useState<'day' | 'week' | 'month'>('day');
+  const [color, setColor] = useState<
+    'default' | 'blue' | 'green' | 'pink' | 'purple'
+  >('default');
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -24,20 +38,24 @@ const DashboardPage: FC = () => {
   }, [status, router]);
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      fetch('/api/tasks')
-        .then(async (res) => {
-          if (!res.ok) {
-            const body = await res.json();
-            console.error('Fetch tasks failed:', res.status, body);
-            return [];
-          }
-          return res.json();
-        })
-        .then((data) => setTasks(data))
-        .catch((err) => console.error('Fetch error:', err));
-    }
-  }, [status]);
+    fetch('/api/tasks')
+      .then((res) => res.json())
+      .then((data) => {
+        setEvents(
+          data.map((task: Task) => ({
+            id: task.id,
+            start: new Date(task.startTime),
+            end: new Date(task.endTime),
+            title: task.title,
+            color: 'default',
+          }))
+        );
+      });
+  }, []);
+
+  useEffect(() => {
+    console.log(events);
+  }, [events]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,36 +65,24 @@ const DashboardPage: FC = () => {
       body: JSON.stringify({ title, startTime, endTime, color }),
     });
     const newTask = await res.json();
-    setTasks((prev) => [...prev, newTask]);
+    if (!title || !startTime || !endTime) return;
+    const newEvent: CalendarEvent = {
+      id: newTask.id,
+      start: new Date(startTime),
+      end: new Date(endTime),
+      title,
+      color,
+    };
+    setEvents((prev) => [...prev, newEvent]);
     setTitle('');
     setStartTime('');
     setEndTime('');
-    setColor('');
+    setColor('default');
   };
 
-  const handleDelete = async (id: string) => {
-    await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+  const handleDelete = (id: string) => {
+    setEvents((prev) => prev.filter((e) => e.id !== id));
   };
-
-  const filteredTasks = tasks.filter((task: Task) => {
-    const now = new Date();
-    const taskStart = new Date(task.startTime);
-    if (view === 'day') {
-      return taskStart.toDateString() === now.toDateString();
-    } else if (view === 'week') {
-      const weekStart = new Date(now);
-      weekStart.setDate(now.getDate() - now.getDay());
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekEnd.getDate() + 7);
-      return taskStart >= weekStart && taskStart < weekEnd;
-    } else {
-      return (
-        taskStart.getMonth() === now.getMonth() &&
-        taskStart.getFullYear() === now.getFullYear()
-      );
-    }
-  });
 
   if (status === 'loading') {
     return (
@@ -87,121 +93,96 @@ const DashboardPage: FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-      <header className="flex justify-between items-center p-6 bg-card shadow">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <div className="flex items-center space-x-4">
-          <ThemeSwitcher />
-          <AuthButtons />
+    <div className="min-h-screen bg-background text-foreground flex">
+      {/* Sidebar */}
+      <aside className="w-80 min-w-[260px] max-w-xs bg-card border-r border-border h-screen p-0 flex flex-col">
+        <div className="p-6 border-b">
+          <h2 className="text-lg font-bold mb-4">Create Task</h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="text"
+              placeholder="Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full p-2 rounded bg-background border"
+              required
+            />
+            <input
+              type="datetime-local"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              className="w-full p-2 rounded bg-background border"
+              required
+            />
+            <input
+              type="datetime-local"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
+              className="w-full p-2 rounded bg-background border"
+              required
+            />
+            <select
+              value={color}
+              onChange={(e) =>
+                setColor(
+                  e.target.value as
+                    | 'default'
+                    | 'blue'
+                    | 'green'
+                    | 'pink'
+                    | 'purple'
+                )
+              }
+              className="w-full p-2 rounded bg-background border">
+              <option value="default">Default</option>
+              <option value="blue">Blue</option>
+              <option value="green">Green</option>
+              <option value="pink">Pink</option>
+              <option value="purple">Purple</option>
+            </select>
+            <button
+              type="submit"
+              className="w-full bg-primary text-white py-2 rounded">
+              Create Task
+            </button>
+          </form>
         </div>
-      </header>
-
-      <main className="p-8">
-        <h2 className="text-xl font-semibold mb-4">
-          Welcome, {session?.user?.name || 'User'}!
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Form - 1/3 width */}
-          <div className="md:col-span-1 p-4 bg-card rounded-lg shadow">
-            <h3 className="font-medium mb-2">Create New Task</h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full p-2 rounded bg-background border"
-                required
-              />
-              <input
-                type="date"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                className="w-full p-2 rounded bg-background border"
-                required
-              />
-              <input
-                type="date"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                className="w-full p-2 rounded bg-background border"
-                required
-              />
-              <input
-                type="color"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                className="w-full p-2 rounded bg-background border"
-              />
-              <button
-                type="submit"
-                className="w-full bg-primary text-white py-2 rounded">
-                Create Task
-              </button>
-            </form>
+      </aside>
+      {/* Main Calendar Section */}
+      <main className="flex-1 p-8 overflow-auto">
+        <header className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <div className="flex items-center space-x-4">
+            <ThemeSwitcher />
+            <AuthButtons />
           </div>
-
-          {/* Task List - 2/3 width */}
-          <div className="md:col-span-2 p-4 bg-card rounded-lg shadow">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-medium">Your Tasks</h3>
-              <div className="space-x-2">
-                <button
-                  onClick={() => setView('day')}
-                  className={`px-2 py-1 rounded ${
-                    view === 'day' ? 'bg-primary text-white' : 'bg-muted'
-                  }`}>
-                  Day
-                </button>
-                <button
-                  onClick={() => setView('week')}
-                  className={`px-2 py-1 rounded ${
-                    view === 'week' ? 'bg-primary text-white' : 'bg-muted'
-                  }`}>
-                  Week
-                </button>
-                <button
-                  onClick={() => setView('month')}
-                  className={`px-2 py-1 rounded ${
-                    view === 'month' ? 'bg-primary text-white' : 'bg-muted'
-                  }`}>
-                  Month
-                </button>
-              </div>
+        </header>
+        <section >
+          <Calendar
+            events={events}
+            onChangeView={() => {}}
+            onEventClick={(event) => handleDelete(event.id)}>
+            <div className="flex items-center gap-2 mb-4">
+              <CalendarPrevTrigger>{'<'}</CalendarPrevTrigger>
+              <CalendarTodayTrigger>Today</CalendarTodayTrigger>
+              <CalendarNextTrigger>{'>'}</CalendarNextTrigger>
+              <CalendarViewTrigger view="day">Day</CalendarViewTrigger>
+              <CalendarViewTrigger view="week">Week</CalendarViewTrigger>
+              <CalendarViewTrigger view="month">Month</CalendarViewTrigger>
+              <CalendarViewTrigger view="year">Year</CalendarViewTrigger>
+              <span className="ml-auto font-semibold">
+                <CalendarCurrentDate />
+              </span>
             </div>
-
-            <ul className="space-y-2">
-              {filteredTasks.map((task: Task) => (
-                <li
-                  key={task.id}
-                  className="p-3 rounded border"
-                  style={{ backgroundColor: task.color || '#f0f0f0' }}>
-                  <div className="flex justify-between">
-                    <div>
-                      <strong>{task.title}</strong>
-                      <br />
-                      <span>
-                        {new Date(task.startTime).toLocaleString()} -{' '}
-                        {new Date(task.endTime).toLocaleString()}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => handleDelete(task.id)}
-                      className="text-sm text-red-500">
-                      Delete
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+            <div className="h-[80vh]">
+              <CalendarDayView />
+              <CalendarWeekView />
+              <CalendarMonthView />
+              <CalendarYearView />
+            </div>
+          </Calendar>
+        </section>
       </main>
-
-      <footer className="p-4 text-center bg-card text-muted">
-        © {new Date().getFullYear()} Flowtrack
-      </footer>
     </div>
   );
 };
