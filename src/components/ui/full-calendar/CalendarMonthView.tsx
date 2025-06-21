@@ -89,7 +89,7 @@ const CalendarMonthView = () => {
                 return (
                   <div
                     key={event.id}
-                    className="px-1 rounded text-sm flex items-center gap-1 cursor-move"
+                    className="px-1 rounded text-sm flex items-center gap-1 cursor-move hover:bg-muted/40"
                     draggable
                     onDragStart={(e) => {
                       e.dataTransfer.setData('event-id', event.id);

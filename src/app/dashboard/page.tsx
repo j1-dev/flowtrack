@@ -59,40 +59,88 @@ const DashboardPage: FC = () => {
   const handleSaveTask = async (task: Task) => {
     if (!task.title || !task.startTime || !task.endTime) return;
     if (task.id) {
-      // Edit existing
-      const res = await fetch(`/api/tasks/${task.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(task),
-      });
-      const updated = await res.json();
-      setEvents((prev) =>
-        prev.map((e) =>
-          e.id === updated.id
+      // Optimistically update existing event
+      // Save previous state for revert
+      let prevEvents: CalendarEvent[] = [];
+      setEvents((prev) => {
+        prevEvents = prev;
+        return prev.map((e) =>
+          e.id === task.id
             ? {
-                ...updated,
-                start: new Date(updated.startTime),
-                end: new Date(updated.endTime),
+                ...e,
+                ...task,
+                color: task.color ?? undefined,
+                start: new Date(task.startTime),
+                end: new Date(task.endTime),
               }
             : e
-        )
-      );
-    } else {
-      // Create new
-      const res = await fetch('/api/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(task),
+        );
       });
-      const newTask = await res.json();
-      setEvents((prev) => [
-        ...prev,
-        {
-          ...newTask,
-          start: new Date(newTask.startTime),
-          end: new Date(newTask.endTime),
-        },
-      ]);
+      // Send update to server
+      try {
+        const res = await fetch(`/api/tasks/${task.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(task),
+        });
+        if (!res.ok) throw new Error('Failed to update');
+        const updated = await res.json();
+        setEvents((prev) =>
+          prev.map((e) =>
+            e.id === updated.id
+              ? {
+                  ...updated,
+                  start: new Date(updated.startTime),
+                  end: new Date(updated.endTime),
+                }
+              : e
+          )
+        );
+      } catch {
+        // Revert optimistic update
+        setEvents(prevEvents);
+      }
+    } else {
+      // Optimistically add new event with a temporary id
+      const tempId = `temp-${Date.now()}`;
+      const optimisticEvent = {
+        ...task,
+        id: tempId,
+        color: task.color ?? undefined,
+        start: new Date(task.startTime),
+        end: new Date(task.endTime),
+      };
+      // Save previous state for revert
+      let prevEvents: CalendarEvent[] = [];
+      setEvents((prev) => {
+        prevEvents = prev;
+        return [...prev, optimisticEvent];
+      });
+      // Send create to server
+      try {
+        const res = await fetch('/api/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(task),
+        });
+        if (!res.ok) throw new Error('Failed to create');
+        const newTask = await res.json();
+        setEvents((prev) =>
+          prev.map((e) =>
+            e.id === tempId
+              ? {
+                  ...newTask,
+                  color: newTask.color ?? undefined,
+                  start: new Date(newTask.startTime),
+                  end: new Date(newTask.endTime),
+                }
+              : e
+          )
+        );
+      } catch {
+        // Revert optimistic update
+        setEvents(prevEvents);
+      }
     }
     setEditingTask(null);
     setModalOpen(false);
