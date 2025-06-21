@@ -2,7 +2,6 @@ import { AuthProvider } from '@/components/auth-provider';
 import { ThemeProvider } from 'next-themes';
 import localFont from 'next/font/local';
 import './globals.css';
-import { ThemeSwitcher } from '@/components/theme-switcher';
 
 const helveticaNeue = localFont({
   src: [
@@ -38,12 +37,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${helveticaNeue.className}`}>
         <ThemeProvider attribute="class">
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-          <div className="z-50 fixed bottom-5 right-5">
-            <ThemeSwitcher />
-          </div>
+          <AuthProvider>{children}</AuthProvider>
         </ThemeProvider>
       </body>
     </html>

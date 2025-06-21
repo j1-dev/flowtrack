@@ -71,7 +71,7 @@ const CalendarWeekView = () => {
             return (
               <div
                 className={cn(
-                  'h-full text-sm text-muted-foreground border-l first:border-l-0',
+                  'h-full text-sm text-muted-foreground border-l first:border-l-0 relative cursor-pointer',
                   [0, 6].includes(i) && 'bg-muted/50'
                 )}
                 key={hours[0].toString()}
@@ -176,8 +176,7 @@ const CalendarWeekView = () => {
                   if (event && onEventDrop) {
                     onEventDrop(event, newStart);
                   }
-                }}
-                style={{ position: 'relative', cursor: 'pointer' }}>
+                }}>
                 {cursorY[i] !== null && (
                   <div
                     style={{

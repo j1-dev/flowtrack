@@ -18,6 +18,7 @@ import { AuthButtons } from '@/components/auth-buttons';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import MouseMoveEffect from '@/components/mouse-move-effect';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 
 const features = [
   {
@@ -184,6 +185,9 @@ const HomePage: FC = () => {
           <AuthButtons big />
         </div>
       </section>
+      <div className="z-50 fixed bottom-5 right-5">
+        <ThemeSwitcher />
+      </div>
     </div>
   );
 };

@@ -16,7 +16,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onCreateTask }) => {
     <>
       {/* Mobile menu button (fixed, top left) */}
       <button
-        className="w-6 h-6 absolute top-[30px] left-4 z-40 md:hidden p-2 shadow"
+        className="w-6 h-6 absolute top-[30px] left-4 z-40 md:hidden p-2 "
         onClick={() => setOpen(true)}
         aria-label="Open menu">
         <Menu className="w-6 h-6" />
