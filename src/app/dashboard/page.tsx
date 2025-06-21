@@ -18,8 +18,8 @@ import {
   CalendarViewTrigger,
   CalendarWeekView,
   CalendarYearView,
-} from '@/components/ui/full-calendar';
-import { type CalendarEvent } from '@/components/ui/full-calendar';
+  type CalendarEvent,
+} from '@/components/ui/full-calendar/index';
 import { Task } from '@/lib/types';
 
 const DashboardPage: FC = () => {
