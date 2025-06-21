@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils';
 
 const CalendarMonthView = () => {
   const [dragOverDate, setDragOverDate] = useState<Date | null>(null);
-  const { date, view, events, locale, onEventDrop } = useCalendar();
+  const { date, view, events, locale, onEventDrop, onCreateAtTime } =
+    useCalendar();
   const monthDates = useMemo(() => getDaysInMonth(date), [date]);
   const weekDays = useMemo(() => generateWeekdays(locale), [locale]);
   if (view !== 'month') return null;
@@ -33,13 +34,27 @@ const CalendarMonthView = () => {
           return (
             <div
               className={cn(
-                'ring-1 p-2 text-sm text-muted-foreground ring-border overflow-auto group relative',
+                'cursor-pointer ring-1 p-2 text-sm text-muted-foreground ring-border overflow-auto group relative',
                 !isSameMonth(date, _date) && 'text-muted-foreground/50',
                 dragOverDate &&
                   isSameDay(dragOverDate, _date) &&
                   'ring-2 ring-green-500 z-10'
               )}
               key={_date.toString()}
+              onClick={() => {
+                if (onCreateAtTime) {
+                  const localMidnight = new Date(
+                    _date.getFullYear(),
+                    _date.getMonth(),
+                    _date.getDate()+1,
+                    0,
+                    0,
+                    0,
+                    0
+                  );
+                  onCreateAtTime(localMidnight);
+                }
+              }}
               onDragOver={(e) => {
                 e.preventDefault();
                 setDragOverDate(_date);

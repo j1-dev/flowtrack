@@ -184,8 +184,7 @@ const CalendarWeekView = () => {
                       left: 0,
                       right: 0,
                       top: cursorY[i]!,
-                      height: 2,
-                      background: 'rgba(59,130,246,0.7)',
+                      borderBottom: '2px dashed rgba(59,130,246,0.7)',
                       zIndex: 20,
                       pointerEvents: 'none',
                     }}
