@@ -6,8 +6,15 @@ import { cn } from '@/lib/utils';
 
 const CalendarMonthView = () => {
   const [dragOverDate, setDragOverDate] = useState<Date | null>(null);
-  const { date, view, events, locale, onEventDrop, onCreateAtTime } =
-    useCalendar();
+  const {
+    date,
+    view,
+    events,
+    locale,
+    onEventDrop,
+    onCreateAtTime,
+    onEventClick,
+  } = useCalendar();
   const monthDates = useMemo(() => getDaysInMonth(date), [date]);
   const weekDays = useMemo(() => generateWeekdays(locale), [locale]);
   if (view !== 'month') return null;
@@ -46,7 +53,7 @@ const CalendarMonthView = () => {
                   const localMidnight = new Date(
                     _date.getFullYear(),
                     _date.getMonth(),
-                    _date.getDate()+1,
+                    _date.getDate() + 1,
                     0,
                     0,
                     0,
@@ -81,7 +88,9 @@ const CalendarMonthView = () => {
               <span
                 className={cn(
                   'size-6 grid place-items-center rounded-full mb-1 sticky top-0',
-                  isToday(_date) && 'bg-primary text-primary-foreground'
+                  isToday(_date)
+                    ? 'bg-primary text-primary-foreground '
+                    : 'group-hover:bg-muted'
                 )}>
                 {format(_date, 'd')}
               </span>
@@ -89,11 +98,15 @@ const CalendarMonthView = () => {
                 return (
                   <div
                     key={event.id}
-                    className="px-1 rounded text-sm flex items-center gap-1 cursor-move hover:bg-muted/40"
+                    className="px-1 rounded text-sm flex items-center gap-1 cursor-move hover:bg-muted/40 z-50"
                     draggable
                     onDragStart={(e) => {
                       e.dataTransfer.setData('event-id', event.id);
                       e.dataTransfer.effectAllowed = 'move';
+                    }}
+                    onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                      e.stopPropagation();
+                      onEventClick?.(event);
                     }}>
                     <div
                       className={cn('shrink-0')}

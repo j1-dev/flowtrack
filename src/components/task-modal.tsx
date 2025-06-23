@@ -35,8 +35,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   useEffect(() => {
     if (initialTask) {
       setTitle(initialTask.title);
-      setStartTime(initialTask.start.toISOString().slice(0, 16));
-      setEndTime(initialTask.end.toISOString().slice(0, 16));
+      setStartTime(toLocalDateTimeInputValue(initialTask.start));
+      setEndTime(toLocalDateTimeInputValue(initialTask.end));
       setColor(initialTask.color || '#6366f1');
     } else {
       setTitle('');
@@ -46,7 +46,24 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     }
   }, [initialTask, open]);
 
+function toLocalDateTimeInputValue(date: Date) {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return (
+    date.getFullYear() +
+    '-' +
+    pad(date.getMonth() + 1) +
+    '-' +
+    pad(date.getDate()) +
+    'T' +
+    pad(date.getHours()) +
+    ':' +
+    pad(date.getMinutes())
+  );
+}
+
   const handleSubmit = (e: React.FormEvent) => {
+    console.log("{date object}", initialTask?.start)
+    console.log("{iso string}",startTime)
     e.preventDefault();
     if (!title || !startTime || !endTime) return;
     onSave({
@@ -63,7 +80,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{initialTask ? 'Edit Task' : 'Create Task'}</DialogTitle>
+          <DialogTitle>
+            {initialTask?.id ? 'Edit Task' : 'Create Task'}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -105,7 +124,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
           </select>
           <DialogFooter>
             <Button type="submit">
-              {initialTask ? 'Save Changes' : 'Create Task'}
+              {initialTask?.id ? 'Save Changes' : 'Create Task'}
             </Button>
             <DialogClose asChild>
               <Button type="button" variant="ghost">
