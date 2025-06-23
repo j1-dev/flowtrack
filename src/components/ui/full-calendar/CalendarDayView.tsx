@@ -119,7 +119,12 @@ const CalendarDayView = () => {
             />
           )}
           {hours.map((hour) => (
-            <EventGroup key={hour.toString()} hour={hour} events={events} />
+            <EventGroup
+              key={hour.toString()}
+              hour={hour}
+              events={events}
+              calendarRef={calendarRef}
+            />
           ))}
         </div>
       </div>

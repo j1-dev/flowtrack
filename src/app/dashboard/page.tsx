@@ -191,7 +191,7 @@ const DashboardPage: FC = () => {
       />
       <main className="flex-1 p-8 overflow-auto  transition-all duration-200">
         <header className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold md:ml-0 ml-4">Dashboard</h1>
+          <h1 className="text-4xl font-black md:ml-0 ml-4">Dashboard</h1>
           <div className="flex items-center space-x-4">
             <ThemeSwitcher />
             <AuthButtons />
