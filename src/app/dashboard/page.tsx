@@ -27,7 +27,7 @@ const DashboardPage: FC = () => {
   const router = useRouter();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<CalendarEvent | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -163,10 +163,12 @@ const DashboardPage: FC = () => {
     handleSaveTask(updatedTask as Task); // handleSaveTask expects Task shape
   };
 
-  // const handleDelete = async (id: string) => {
-  //   await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
-  //   setEvents((prev) => prev.filter((e) => e.id !== id));
-  // };
+  const handleDeleteTask = async (id: string) => {
+    setEvents((prev) => prev.filter((e) => e.id !== id));
+    setEditingTask(null);
+    setModalOpen(false);
+    await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+  };
 
   if (status === 'loading') {
     return (
@@ -191,6 +193,7 @@ const DashboardPage: FC = () => {
           setEditingTask(null);
         }}
         onSave={handleSaveTask}
+        onDelete={(task) => handleDeleteTask(task.id)}
         initialTask={editingTask}
       />
       <main className="flex-1 p-8 overflow-auto  transition-all duration-200">
@@ -211,9 +214,9 @@ const DashboardPage: FC = () => {
                 id: event.id,
                 title: event.title,
                 color: event.color,
-                start: event.start,
-                end: event.end,
-              });
+                startTime: event.start,
+                endTime: event.end,
+              } as Task);
               setModalOpen(true);
             }}
             onCreateAtTime={(date) => {
@@ -221,10 +224,10 @@ const DashboardPage: FC = () => {
               setEditingTask({
                 id: '',
                 title: '',
-                start: date,
-                end: new Date(date.getTime() + 60 * 60 * 1000),
+                startTime: date,
+                endTime: new Date(date.getTime() + 60 * 60 * 1000),
                 color: '#6366f1',
-              });
+              } as Task);
               setModalOpen(true);
             }}
             onEventDrop={handleEventDrop}>

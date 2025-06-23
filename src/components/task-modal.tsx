@@ -10,20 +10,21 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CalendarEvent } from '@/components/ui/full-calendar';
 import { Task } from '@/lib/types';
 
 interface TaskModalProps {
   open: boolean;
   onClose: () => void;
   onSave: (task: Task) => void;
-  initialTask?: CalendarEvent | null;
+  onDelete?: (task: Task) => void;
+  initialTask?: Task | null;
 }
 
 export const TaskModal: React.FC<TaskModalProps> = ({
   open,
   onClose,
   onSave,
+  onDelete,
   initialTask,
 }) => {
   const [title, setTitle] = useState('');
@@ -35,8 +36,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   useEffect(() => {
     if (initialTask) {
       setTitle(initialTask.title);
-      setStartTime(toLocalDateTimeInputValue(initialTask.start));
-      setEndTime(toLocalDateTimeInputValue(initialTask.end));
+      setStartTime(toLocalDateTimeInputValue(initialTask.startTime));
+      setEndTime(toLocalDateTimeInputValue(initialTask.endTime));
       setColor(initialTask.color || '#6366f1');
     } else {
       setTitle('');
@@ -46,24 +47,22 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     }
   }, [initialTask, open]);
 
-function toLocalDateTimeInputValue(date: Date) {
-  const pad = (n: number) => n.toString().padStart(2, '0');
-  return (
-    date.getFullYear() +
-    '-' +
-    pad(date.getMonth() + 1) +
-    '-' +
-    pad(date.getDate()) +
-    'T' +
-    pad(date.getHours()) +
-    ':' +
-    pad(date.getMinutes())
-  );
-}
+  function toLocalDateTimeInputValue(date: Date) {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return (
+      date.getFullYear() +
+      '-' +
+      pad(date.getMonth() + 1) +
+      '-' +
+      pad(date.getDate()) +
+      'T' +
+      pad(date.getHours()) +
+      ':' +
+      pad(date.getMinutes())
+    );
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
-    console.log("{date object}", initialTask?.start)
-    console.log("{iso string}",startTime)
     e.preventDefault();
     if (!title || !startTime || !endTime) return;
     onSave({
@@ -75,6 +74,7 @@ function toLocalDateTimeInputValue(date: Date) {
     } as Task);
     onClose();
   };
+
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -126,6 +126,15 @@ function toLocalDateTimeInputValue(date: Date) {
             <Button type="submit">
               {initialTask?.id ? 'Save Changes' : 'Create Task'}
             </Button>
+            {initialTask?.id && (
+              <Button
+                className='absolute left-6 bottom-6'
+                type="button"
+                variant="destructive"
+                onClick={() => onDelete?.(initialTask)}>
+                Delete task
+              </Button>
+            )}
             <DialogClose asChild>
               <Button type="button" variant="ghost">
                 Cancel
