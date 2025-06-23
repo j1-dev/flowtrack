@@ -1,6 +1,6 @@
 /**
  * HomePage.tsx
- * Landing page for Flowtrack with dark mode toggle and modern design
+ * Landing page for Flowtrack with dark mode toggle and professional design
  */
 'use client';
 
@@ -23,23 +23,23 @@ import { ThemeSwitcher } from '@/components/theme-switcher';
 const features = [
   {
     icon: <Calendar className="w-7 h-7" />,
-    title: 'Smart Task Management',
-    desc: 'Organize your day with drag-and-drop tasks, color labels, and instant scheduling.',
+    title: 'Intelligent Task Management',
+    desc: 'Streamline your workflow with advanced task organization, priority setting, and deadline tracking for maximum efficiency.',
   },
   {
     icon: <Clock className="w-7 h-7" />,
-    title: 'Time Analytics',
-    desc: 'Visualize your productivity with beautiful charts and actionable insights.',
+    title: 'Productivity Analytics',
+    desc: 'Gain actionable insights into your work patterns with comprehensive time tracking and performance metrics.',
   },
   {
     icon: <LineChart className="w-7 h-7" />,
-    title: 'Habit Builder',
-    desc: 'Build habits with streaks, reminders, and playful progress tracking.',
+    title: 'Habit Development',
+    desc: 'Build consistent routines and track progress with data-driven habit formation tools and milestone tracking.',
   },
   {
     icon: <CheckCircle2 className="w-7 h-7" />,
-    title: 'Goal Achievement',
-    desc: 'Break down big goals into small wins and celebrate your progress.',
+    title: 'Goal Achievement System',
+    desc: 'Transform ambitious objectives into manageable milestones with structured goal-setting and progress monitoring.',
   },
 ];
 
@@ -48,14 +48,14 @@ const testimonials = [
     name: 'Alex Rivera',
     avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
     quote:
-      'Flowtrack made me love planning my day. The playful UI keeps me coming back!',
+      'Flowtrack revolutionized my productivity workflow. The analytics helped me identify and eliminate time-wasting activities.',
     stars: 5,
   },
   {
     name: 'Jamie Chen',
     avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
     quote:
-      'I finally built a daily routine that sticks. The streaks are so motivating!',
+      'As a project manager, Flowtrack helps me maintain consistent daily routines that drive team performance and personal growth.',
     stars: 5,
   },
 ];
@@ -93,7 +93,7 @@ const TestimonialCard: FC<{
         <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-300" />
       ))}
     </div>
-    <p className="italic text-foreground/80 mb-2">“{quote}”</p>
+    <p className="italic text-foreground/80 mb-2">&quot;{quote}&quot;</p>
     <span className="font-semibold text-primary">{name}</span>
   </div>
 );
@@ -118,26 +118,29 @@ const HomePage: FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
             className="text-5xl md:text-7xl font-extrabold text-center bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent drop-shadow-lg mb-6">
-            Playful Productivity, <span className="text-primary">Mastered</span>
+            Professional Productivity,{' '}
+            <span className="text-primary">Simplified</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.7 }}
             className="text-xl md:text-2xl text-foreground text-center max-w-2xl mb-8">
-            Flowtrack helps you plan, track, and celebrate your daily wins with
-            a bold, playful interface.
+            Flowtrack is the comprehensive task management and productivity
+            platform designed for modern professionals who demand results.
           </motion.p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <AuthButtons primary big className="h-10 px-6 text-lg" />
             <Button variant="outline" size="lg" className="h-10 px-6 text-lg">
-              Learn More
+              View Features
             </Button>
           </div>
           <div className="flex items-center gap-2 text-foreground/80 text-sm">
             <Users className="w-5 h-5" />
-            Join <span className="font-bold text-primary">3,000+</span> happy
-            users
+            Trusted by <span className="font-bold text-primary">
+              3
+            </span>{' '}
+            professionals worldwide
           </div>
         </div>
       </section>
@@ -146,7 +149,7 @@ const HomePage: FC = () => {
         <div className="container mx-auto px-4">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-12 text-foreground">
             Everything you need to{' '}
-            <span className="text-primary">win your day</span>
+            <span className="text-primary">optimize your workflow</span>
           </h2>
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {features.map((f) => (
@@ -164,7 +167,7 @@ const HomePage: FC = () => {
       <section className="py-16 bg-card/90 backdrop-blur-md">
         <div className="container mx-auto px-4">
           <h3 className="text-2xl font-bold text-center mb-8 text-primary">
-            Loved by productive people
+            Trusted by professionals across industries
           </h3>
           <div className="flex flex-col md:flex-row gap-8 justify-center items-center">
             {testimonials.map((t) => (
@@ -177,10 +180,11 @@ const HomePage: FC = () => {
       <section className="py-20 bg-card/90 backdrop-blur-md">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl md:text-5xl font-extrabold mb-6">
-            Ready to Play &amp; Win?
+            Ready to Transform Your Productivity?
           </h2>
           <p className="text-xl mb-8 text-primary-foreground/90">
-            Start your playful productivity journey with Flowtrack today.
+            Join thousands of professionals who have already streamlined their
+            workflow with Flowtrack.
           </p>
           <AuthButtons big />
         </div>
