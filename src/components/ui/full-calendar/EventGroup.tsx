@@ -6,7 +6,7 @@ import { Task } from '@/lib/types';
 type EventGroupProps = {
   events: Task[];
   hour: Date;
-  calendarRef?: React.RefObject<HTMLDivElement | null>;
+  calendarRef?: React.RefObject<HTMLDivElement | null> | HTMLDivElement | null;
 };
 
 const EventGroup = ({ events, hour, calendarRef }: EventGroupProps) => {
@@ -55,13 +55,23 @@ const EventGroup = ({ events, hour, calendarRef }: EventGroupProps) => {
                 }}
                 onDragEnd={(e) => {
                   e.preventDefault();
-                  if (!calendarRef?.current || !onEventResize) return;
-                  const rect = calendarRef.current.getBoundingClientRect();
-                  const scrollTop = calendarRef.current.scrollTop;
+                  if (!onEventResize) return;
+                  let refEl: HTMLDivElement | null = null;
+                  if (calendarRef) {
+                    if ('current' in calendarRef) {
+                      refEl = calendarRef.current;
+                    } else {
+                      refEl = calendarRef;
+                    }
+                  }
+                  if (!refEl) return;
+                  const rect = refEl.getBoundingClientRect();
+                  // For week view, scrollTop may not be needed, but for day view it is
+                  const scrollTop = refEl.scrollTop ?? 0;
                   const y = e.clientY - rect.top + scrollTop;
                   const percent = Math.max(
                     0,
-                    Math.min(1, y / calendarRef.current.scrollHeight)
+                    Math.min(1, y / (refEl.scrollHeight || rect.height))
                   );
                   let minutes = Math.round(percent * 24 * 60);
                   minutes = Math.round(minutes / 15) * 15;
