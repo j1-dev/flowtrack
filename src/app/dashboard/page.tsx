@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthButtons } from '@/components/auth-buttons';
 import { ThemeSwitcher } from '@/components/theme-switcher';
-import { Navbar } from '@/components/navbar';
+// import { Navbar } from '@/components/navbar';
 import { TaskModal } from '@/components/task-modal';
 import {
   Calendar,
@@ -176,12 +176,12 @@ const DashboardPage: FC = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
-      <Navbar
+      {/* <Navbar
         onCreateTask={() => {
           setEditingTask(null);
           setModalOpen(true);
         }}
-      />
+      /> */}
       <TaskModal
         open={modalOpen}
         onClose={() => {
