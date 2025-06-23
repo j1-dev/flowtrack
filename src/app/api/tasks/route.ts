@@ -16,11 +16,11 @@ export async function POST(req: Request) {
   if (!(typeof userOrResponse !== 'object' || 'id' in userOrResponse)) {
     return userOrResponse;
   }
-  const { title, startTime, endTime, color } = await req.json();
+  const { title, start, end, color } = await req.json();
   const task = await createTask(userOrResponse.id, {
     title,
-    startTime: new Date(startTime),
-    endTime: new Date(endTime),
+    start: new Date(start),
+    end: new Date(end),
     color,
   });
   return NextResponse.json(task);

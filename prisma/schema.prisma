@@ -13,33 +13,31 @@ model User {
   email         String    @unique
   name          String?
   image         String?
-  emailVerified DateTime?
   createdAt     DateTime  @default(now())
-
-  tasks  Task[]
-  habits Habit[]
-
-  accounts Account[]
-  sessions Session[]
+  emailVerified DateTime?
+  accounts      Account[]
+  habits        Habit[]
+  sessions      Session[]
+  tasks         Task[]
 }
 
 model Task {
-  id        String   @id @default(cuid())
-  title     String
-  startTime DateTime
-  endTime   DateTime
-  color     String?
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
+  id     String   @id @default(cuid())
+  title  String
+  start  DateTime
+  end    DateTime
+  color  String?
+  userId String
+  user   User     @relation(fields: [userId], references: [id])
 }
 
 model Habit {
   id        String @id @default(cuid())
   name      String
-  frequency String // e.g. daily, weekly
+  frequency String
   streak    Int    @default(0)
-  user      User   @relation(fields: [userId], references: [id])
   userId    String
+  user      User   @relation(fields: [userId], references: [id])
 }
 
 model Account {

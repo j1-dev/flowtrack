@@ -15,8 +15,8 @@ export type User = {
 export type Task = {
   id: string;
   title: string;
-  startTime: Date;
-  endTime: Date;
+  start: Date;
+  end: Date;
   color?: string | null;
   userId: string;
   user: User;

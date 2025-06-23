@@ -36,8 +36,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   useEffect(() => {
     if (initialTask) {
       setTitle(initialTask.title);
-      setStartTime(toLocalDateTimeInputValue(initialTask.startTime));
-      setEndTime(toLocalDateTimeInputValue(initialTask.endTime));
+      setStartTime(toLocalDateTimeInputValue(initialTask.start));
+      setEndTime(toLocalDateTimeInputValue(initialTask.end));
       setColor(initialTask.color || '#6366f1');
     } else {
       setTitle('');
@@ -68,8 +68,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     onSave({
       id: initialTask?.id || '',
       title,
-      startTime: new Date(startTime),
-      endTime: new Date(endTime),
+      start: new Date(startTime),
+      end: new Date(endTime),
       color,
     } as Task);
     onClose();

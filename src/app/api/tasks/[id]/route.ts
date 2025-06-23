@@ -15,11 +15,11 @@ export async function PUT(
   if (!(typeof verify !== 'object' || 'userId' in verify)) {
     return verify;
   }
-  const { title, startTime, endTime, color } = await req.json();
+  const { title, start, end, color } = await req.json();
   const updated = await updateTaskById(id, {
     title,
-    startTime: new Date(startTime),
-    endTime: new Date(endTime),
+    start: new Date(start),
+    end: new Date(end),
     color,
   });
   return NextResponse.json(updated);

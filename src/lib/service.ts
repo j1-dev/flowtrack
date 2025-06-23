@@ -26,7 +26,7 @@ export async function updateUserByEmail(
 export async function getTasksByUserId(userId: string) {
   return prisma.task.findMany({
     where: { userId },
-    orderBy: { startTime: 'asc' },
+    orderBy: { start: 'asc' },
   });
 }
 
@@ -36,7 +36,7 @@ export async function getTaskById(id: string) {
 
 export async function createTask(
   userId: string,
-  data: { title: string; startTime: Date; endTime: Date; color?: string }
+  data: { title: string; start: Date; end: Date; color?: string }
 ) {
   return prisma.task.create({
     data: { ...data, userId },
@@ -45,7 +45,7 @@ export async function createTask(
 
 export async function updateTaskById(
   id: string,
-  data: { title?: string; startTime?: Date; endTime?: Date; color?: string }
+  data: { title?: string; start?: Date; end?: Date; color?: string }
 ) {
   return prisma.task.update({
     where: { id },

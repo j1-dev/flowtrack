@@ -15,11 +15,14 @@ const CalendarMonthView = () => {
     onCreateAtTime,
     onEventClick,
     setView,
-    setDate
+    setDate,
   } = useCalendar();
   const monthDates = useMemo(() => getDaysInMonth(date), [date]);
   const weekDays = useMemo(() => generateWeekdays(locale), [locale]);
+
   if (view !== 'month') return null;
+
+  if (!Array.isArray(events)) return null;
 
   return (
     <div className="h-full flex flex-col">
@@ -52,16 +55,16 @@ const CalendarMonthView = () => {
               key={_date.toString()}
               onClick={() => {
                 if (onCreateAtTime) {
-                  const localMidnight = new Date(
+                  const noon = new Date(
                     _date.getFullYear(),
                     _date.getMonth(),
-                    _date.getDate() + 1,
-                    0,
+                    _date.getDate(),
+                    12, // 12 PM
                     0,
                     0,
                     0
                   );
-                  onCreateAtTime(localMidnight);
+                  onCreateAtTime(noon);
                 }
               }}
               onDragOver={(e) => {
@@ -96,8 +99,8 @@ const CalendarMonthView = () => {
                 )}
                 onClick={(e: React.MouseEvent<HTMLSpanElement>) => {
                   e.stopPropagation();
-                  setView("day");
-                  setDate(_date)
+                  setView('day');
+                  setDate(_date);
                 }}>
                 {format(_date, 'd')}
               </span>

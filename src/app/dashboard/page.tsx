@@ -18,14 +18,13 @@ import {
   CalendarViewTrigger,
   CalendarWeekView,
   CalendarYearView,
-  type CalendarEvent,
 } from '@/components/ui/full-calendar/index';
 import { Task } from '@/lib/types';
 
 const DashboardPage: FC = () => {
   const { status } = useSession();
   const router = useRouter();
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [events, setEvents] = useState<Task[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
@@ -42,8 +41,8 @@ const DashboardPage: FC = () => {
         setEvents(
           data.map((task: Task) => ({
             id: task.id,
-            start: new Date(task.startTime),
-            end: new Date(task.endTime),
+            start: new Date(task.start),
+            end: new Date(task.end),
             title: task.title,
             color: task.color,
           }))
@@ -57,11 +56,11 @@ const DashboardPage: FC = () => {
   }, [events]);
 
   const handleSaveTask = async (task: Task) => {
-    if (!task.title || !task.startTime || !task.endTime) return;
+    if (!task.title || !task.start || !task.end) return;
     if (task.id) {
       // Optimistically update existing event
       // Save previous state for revert
-      let prevEvents: CalendarEvent[] = [];
+      let prevEvents: Task[] = [];
       setEvents((prev) => {
         prevEvents = prev;
         return prev.map((e) =>
@@ -70,8 +69,8 @@ const DashboardPage: FC = () => {
                 ...e,
                 ...task,
                 color: task.color ?? undefined,
-                start: new Date(task.startTime),
-                end: new Date(task.endTime),
+                start: new Date(task.start),
+                end: new Date(task.end),
               }
             : e
         );
@@ -90,8 +89,8 @@ const DashboardPage: FC = () => {
             e.id === updated.id
               ? {
                   ...updated,
-                  start: new Date(updated.startTime),
-                  end: new Date(updated.endTime),
+                  start: new Date(updated.start),
+                  end: new Date(updated.end),
                 }
               : e
           )
@@ -105,13 +104,12 @@ const DashboardPage: FC = () => {
       const tempId = `temp-${Date.now()}`;
       const optimisticEvent = {
         ...task,
-        id: tempId,
         color: task.color ?? undefined,
-        start: new Date(task.startTime),
-        end: new Date(task.endTime),
+        start: new Date(task.start),
+        end: new Date(task.end),
       };
       // Save previous state for revert
-      let prevEvents: CalendarEvent[] = [];
+      let prevEvents: Task[] = [];
       setEvents((prev) => {
         prevEvents = prev;
         return [...prev, optimisticEvent];
@@ -146,19 +144,17 @@ const DashboardPage: FC = () => {
     setModalOpen(false);
   };
 
-  const handleEventDrop = (event: CalendarEvent, newStart: Date) => {
-    const duration = event.end.getTime() - event.start.getTime();
+  const handleEventDrop = (task: Task, newStart: Date) => {
+    const duration = task.end.getTime() - task.start.getTime();
     // Ensure newStart uses the original event's date, only updating the time
     const correctedStart = new Date(newStart);
     correctedStart.setHours(newStart.getHours(), newStart.getMinutes(), 0, 0);
     const newEnd = new Date(correctedStart.getTime() + duration);
     // Update event in state and persist to backend
     const updatedTask = {
-      id: event.id,
-      title: event.title,
-      color: event.color,
-      startTime: correctedStart,
-      endTime: newEnd,
+      ...task,
+      start: correctedStart,
+      end: newEnd,
     };
     handleSaveTask(updatedTask as Task); // handleSaveTask expects Task shape
   };
@@ -210,13 +206,7 @@ const DashboardPage: FC = () => {
             onChangeView={() => {}}
             onEventClick={(event) => {
               console.log('[DEBUG] onEventClick', event);
-              setEditingTask({
-                id: event.id,
-                title: event.title,
-                color: event.color,
-                startTime: event.start,
-                endTime: event.end,
-              } as Task);
+              setEditingTask(event as Task);
               setModalOpen(true);
             }}
             onCreateAtTime={(date) => {
@@ -224,13 +214,23 @@ const DashboardPage: FC = () => {
               setEditingTask({
                 id: '',
                 title: '',
-                startTime: date,
-                endTime: new Date(date.getTime() + 60 * 60 * 1000),
+                start: date,
+                end: new Date(date.getTime() + 60 * 60 * 1000),
                 color: '#6366f1',
               } as Task);
               setModalOpen(true);
             }}
-            onEventDrop={handleEventDrop}>
+            onEventDrop={handleEventDrop}
+            onEventResize={(eventId, newEnd) => {
+              console.log('[DEBUG] onEventResize: ', eventId)
+              const event = events.find((e) => e.id === eventId);
+              if (!event) return;
+              const updatedTask = {
+                ...event,
+                end: newEnd,
+              };
+              handleSaveTask(updatedTask);
+            }}>
             {/* Responsive calendar header row */}
             <div className="flex flex-col md:flex-row md:items-center md:gap-2 mb-4">
               {/* Desktop: all triggers and right-aligned actions in one row */}

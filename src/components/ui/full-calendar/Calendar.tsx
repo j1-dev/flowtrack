@@ -3,8 +3,9 @@
 import React, { useState } from 'react';
 import { enUS } from 'date-fns/locale/en-US';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { ContextType, View, CalendarEvent } from './types';
+import { ContextType, View } from './types';
 import { Locale } from 'date-fns';
+import { Task } from '@/lib/types';
 
 const Context = React.createContext<ContextType>({} as ContextType);
 
@@ -13,14 +14,15 @@ export const useCalendar = () => React.useContext(Context);
 export type CalendarProps = {
   children: React.ReactNode;
   defaultDate?: Date;
-  events?: CalendarEvent[];
+  events?: Task[];
   view?: View;
   locale?: Locale;
   enableHotkeys?: boolean;
   onChangeView?: (view: View) => void;
-  onEventClick?: (event: CalendarEvent) => void;
+  onEventClick?: (event: Task) => void;
   onCreateAtTime?: (date: Date) => void;
-  onEventDrop?: (event: CalendarEvent, newStart: Date) => void;
+  onEventDrop?: (event: Task, newStart: Date) => void;
+  onEventResize?: (eventId: string, newEnd: Date) => void;
 };
 
 const Calendar = ({
@@ -34,6 +36,7 @@ const Calendar = ({
   onChangeView,
   onCreateAtTime,
   onEventDrop,
+  onEventResize,
 }: CalendarProps) => {
   const [view, setView] = useState<View>(_defaultMode);
   const [date, setDate] = useState(defaultDate);
@@ -68,6 +71,7 @@ const Calendar = ({
         today: new Date(),
         onCreateAtTime,
         onEventDrop,
+        onEventResize,
       }}>
       {children}
     </Context.Provider>
