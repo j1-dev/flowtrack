@@ -50,11 +50,6 @@ const DashboardPage: FC = () => {
       });
   }, []);
 
-  // Optionally keep for debugging
-  useEffect(() => {
-    console.log(events);
-  }, [events]);
-
   const handleSaveTask = async (task: Task) => {
     if (!task.title || !task.start || !task.end) return;
     if (task.id) {
@@ -104,6 +99,7 @@ const DashboardPage: FC = () => {
       const tempId = `temp-${Date.now()}`;
       const optimisticEvent = {
         ...task,
+        id: tempId,
         color: task.color ?? undefined,
         start: new Date(task.start),
         end: new Date(task.end),
@@ -129,8 +125,8 @@ const DashboardPage: FC = () => {
               ? {
                   ...newTask,
                   color: newTask.color ?? undefined,
-                  start: new Date(newTask.startTime),
-                  end: new Date(newTask.endTime),
+                  start: new Date(newTask.start),
+                  end: new Date(newTask.end),
                 }
               : e
           )
@@ -142,6 +138,7 @@ const DashboardPage: FC = () => {
     }
     setEditingTask(null);
     setModalOpen(false);
+    console.log(events);
   };
 
   const handleEventDrop = (task: Task, newStart: Date) => {
@@ -222,7 +219,7 @@ const DashboardPage: FC = () => {
             }}
             onEventDrop={handleEventDrop}
             onEventResize={(eventId, newEnd) => {
-              console.log('[DEBUG] onEventResize: ', eventId)
+              console.log('[DEBUG] onEventResize: ', eventId);
               const event = events.find((e) => e.id === eventId);
               if (!event) return;
               const updatedTask = {
