@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import MouseMoveEffect from '@/components/mouse-move-effect';
 import { ThemeSwitcher } from '@/components/theme-switcher';
+import Link from 'next/link';
 
 const features = [
   {
@@ -189,6 +190,23 @@ const HomePage: FC = () => {
           <AuthButtons big />
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="py-8 bg-card/50 backdrop-blur-md border-t border-border/50">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-foreground/60 text-sm">
+            Built by{' '}
+            <Link
+              href="https://j1.lol"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:text-primary/80 transition-colors font-medium underline decoration-primary/30 hover:decoration-primary/60">
+              j1.lol
+            </Link>
+          </p>
+        </div>
+      </footer>
+
       <div className="z-50 fixed bottom-5 right-5">
         <ThemeSwitcher />
       </div>
