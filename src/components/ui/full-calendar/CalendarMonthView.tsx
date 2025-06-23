@@ -14,6 +14,8 @@ const CalendarMonthView = () => {
     onEventDrop,
     onCreateAtTime,
     onEventClick,
+    setView,
+    setDate
   } = useCalendar();
   const monthDates = useMemo(() => getDaysInMonth(date), [date]);
   const weekDays = useMemo(() => generateWeekdays(locale), [locale]);
@@ -87,11 +89,16 @@ const CalendarMonthView = () => {
               }}>
               <span
                 className={cn(
-                  'size-6 grid place-items-center rounded-full mb-1 sticky top-0',
+                  'size-6 grid place-items-center rounded-full mb-1 sticky top-0 z-40',
                   isToday(_date)
-                    ? 'bg-primary text-primary-foreground '
+                    ? 'bg-primary text-primary-foreground'
                     : 'group-hover:bg-muted'
-                )}>
+                )}
+                onClick={(e: React.MouseEvent<HTMLSpanElement>) => {
+                  e.stopPropagation();
+                  setView("day");
+                  setDate(_date)
+                }}>
                 {format(_date, 'd')}
               </span>
               {currentEvents.map((event) => {
