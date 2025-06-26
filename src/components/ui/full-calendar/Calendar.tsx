@@ -38,6 +38,7 @@ const Calendar = ({
   onEventDrop,
   onEventResize,
 }: CalendarProps) => {
+  const currentYear = defaultDate.getFullYear();
   const [view, setView] = useState<View>(_defaultMode);
   const [date, setDate] = useState(defaultDate);
   const events = defaultEvents;
@@ -61,6 +62,7 @@ const Calendar = ({
         view,
         setView,
         date,
+        currentYear,
         setDate,
         events,
         setEvents,

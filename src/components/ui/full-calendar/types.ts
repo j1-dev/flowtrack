@@ -8,6 +8,7 @@ export type ContextType = {
   view: View;
   setView: (view: View) => void;
   date: Date;
+  currentYear: number;
   setDate: (date: Date) => void;
   events: Task[];
   locale: Locale;
