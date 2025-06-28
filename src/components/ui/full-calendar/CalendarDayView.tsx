@@ -26,7 +26,7 @@ const CalendarDayView = () => {
           <TimeTable />
         </div>
         <div
-          className="flex-1 relative cursor-pointer"
+          className="flex-1 relative cursor-pointer h-max"
           ref={calendarRef}
           onMouseMove={(e) => {
             const ref = calendarRef.current;

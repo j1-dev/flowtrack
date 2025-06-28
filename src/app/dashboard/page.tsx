@@ -138,7 +138,6 @@ const DashboardPage: FC = () => {
     }
     setEditingTask(null);
     setModalOpen(false);
-    console.log(events);
   };
 
   const handleEventDrop = (task: Task, newStart: Date) => {

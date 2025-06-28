@@ -210,6 +210,8 @@ const CalendarWeekView = () => {
                     hour={hour}
                     events={events}
                     calendarRef={columnRefs.current[i]}
+                    weekColumnRefs={columnRefs.current}
+                    weekColumnDates={headerDays}
                   />
                 ))}
               </div>
