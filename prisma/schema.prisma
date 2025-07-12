@@ -2,6 +2,18 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -22,22 +34,41 @@ model User {
 }
 
 model Task {
-  id     String   @id @default(cuid())
-  title  String
-  start  DateTime
-  end    DateTime
-  color  String?
-  userId String
-  user   User     @relation(fields: [userId], references: [id])
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  start       DateTime
+  end         DateTime
+  color       String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  completed   Boolean  @default(false)
+  tags        Tag[]
+  priority    Priority @default(MEDIUM)
+  recurrence  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  @@index([completed])
+  @@index([userId])
 }
 
 model Habit {
-  id        String @id @default(cuid())
+  id        String    @id @default(cuid())
   name      String
-  frequency String
-  streak    Int    @default(0)
+  frequency Frequency
+  streak    Int       @default(0)
   userId    String
-  user      User   @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Tag {
+  id    String @id @default(cuid())
+  name  String @unique
+  color String @default("#000000")
+  tasks Task[]
 }
 
 model Account {
