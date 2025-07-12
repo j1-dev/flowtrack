@@ -114,7 +114,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50 transition-all;
+    @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground ;
