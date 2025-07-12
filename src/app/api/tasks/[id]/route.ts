@@ -15,12 +15,16 @@ export async function PUT(
   if (!(typeof verify !== 'object' || 'userId' in verify)) {
     return verify;
   }
-  const { title, start, end, color } = await req.json();
+  const { title, start, end, color, description, priority, recurrence } =
+    await req.json();
   const updated = await updateTaskById(id, {
     title,
     start: new Date(start),
     end: new Date(end),
     color,
+    description,
+    priority,
+    recurrence,
   });
   return NextResponse.json(updated);
 }

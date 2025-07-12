@@ -36,7 +36,15 @@ export async function getTaskById(id: string) {
 
 export async function createTask(
   userId: string,
-  data: { title: string; start: Date; end: Date; color?: string }
+  data: {
+    title: string;
+    start: Date;
+    end: Date;
+    color?: string;
+    description?: string;
+    priority?: 'LOW' | 'MEDIUM' | 'HIGH';
+    recurrence?: string;
+  }
 ) {
   return prisma.task.create({
     data: { ...data, userId },
@@ -45,7 +53,15 @@ export async function createTask(
 
 export async function updateTaskById(
   id: string,
-  data: { title?: string; start?: Date; end?: Date; color?: string }
+  data: {
+    title?: string;
+    start?: Date;
+    end?: Date;
+    color?: string;
+    description?: string;
+    priority?: 'LOW' | 'MEDIUM' | 'HIGH';
+    recurrence?: string;
+  }
 ) {
   return prisma.task.update({
     where: { id },
@@ -69,9 +85,11 @@ export async function getHabitById(id: string) {
   return prisma.habit.findUnique({ where: { id } });
 }
 
+import type { Frequency } from '@prisma/client';
+
 export async function createHabit(
   userId: string,
-  data: { name: string; frequency: string; streak?: number }
+  data: { name: string; frequency: Frequency; streak?: number }
 ) {
   return prisma.habit.create({
     data: { ...data, userId },
@@ -80,7 +98,7 @@ export async function createHabit(
 
 export async function updateHabitById(
   id: string,
-  data: { name?: string; frequency?: string; streak?: number }
+  data: { name?: string; frequency?: Frequency; streak?: number }
 ) {
   return prisma.habit.update({
     where: { id },
