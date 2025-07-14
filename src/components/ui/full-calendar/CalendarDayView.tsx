@@ -22,17 +22,17 @@ const CalendarDayView = () => {
 
   if (view !== 'day') return null;
   const hours = [...Array(24)].map((_, i) => setHours(date, i));
-
-  // handleMouseMove removed; logic is now inline with null checks
+  const now = new Date();
 
   const handleMouseLeave = () => {
     setCursorY(null);
   };
+
   return (
     <div className="flex relative pt-2">
       <div className="flex-1 flex max-h-[80vh] overflow-auto">
         <div className="w-14 shrink-0">
-          <TimeTable ref={currentTimeRef} />
+          <TimeTable />
         </div>
         <div
           className="flex-1 relative cursor-pointer h-max"
@@ -100,6 +100,27 @@ const CalendarDayView = () => {
               onEventDrop(event, newStart);
             }
           }}>
+          {/* Current time indicator */}
+          {(() => {
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const totalMinutes = currentHour * 60 + currentMinute;
+            const position = (totalMinutes / (24 * 60)) * 100;
+
+            return (
+              <div
+                ref={currentTimeRef}
+                className="absolute left-0 right-0 z-40 pointer-events-none"
+                style={{
+                  top: `${position}%`,
+                }}>
+                <div className="flex items-center">
+                  <div className="size-2 rounded-full bg-red-500 absolute -left-1 top-1/2 -translate-y-1/2"></div>
+                  <div className="w-full h-0.5 bg-red-500"></div>
+                </div>
+              </div>
+            );
+          })()}
           {cursorY !== null && (
             <div
               style={{

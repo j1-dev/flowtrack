@@ -75,8 +75,9 @@ const CalendarWeekView = () => {
       </div>
       <div className="flex flex-1">
         <div className="w-fit">
-          <TimeTable ref={currentTimeRef} />
+          <TimeTable />
         </div>
+
         <div className="grid grid-cols-7 flex-1">
           {weekDates.map((hours, i) => {
             return (
@@ -188,6 +189,30 @@ const CalendarWeekView = () => {
                     onEventDrop(event, newStart);
                   }
                 }}>
+                {/* Current time indicator */}
+                {(() => {
+                  const now = new Date();
+                  const currentHour = now.getHours();
+                  const currentMinute = now.getMinutes();
+                  const totalMinutes = currentHour * 60 + currentMinute;
+                  const position = (totalMinutes / (24 * 60)) * 100;
+
+                  return (
+                    <div
+                      ref={currentTimeRef}
+                      className="absolute left-0 right-0 z-40 pointer-events-none"
+                      style={{
+                        top: `${position}%`,
+                      }}>
+                      <div className="flex items-center">
+                        {i === 0 && (
+                          <div className="size-2 rounded-full bg-red-500 absolute -left-1 top-1/2 -translate-y-1/2"></div>
+                        )}
+                        <div className="w-full h-0.5 bg-red-500"></div>
+                      </div>
+                    </div>
+                  );
+                })()}
                 {cursorY[i] !== null && (
                   <div
                     style={{
