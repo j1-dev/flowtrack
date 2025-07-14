@@ -1,10 +1,14 @@
 import React from 'react';
 
-const TimeTable = () => {
+interface TimeTableProps {
+  ref: React.RefObject<HTMLDivElement | null>;
+}
+
+const TimeTable = ({ ref }: TimeTableProps) => {
   const now = new Date();
 
   return (
-    <div className="pr-2 w-12">
+    <div className="pr-2 w-12 ">
       {Array.from(Array(25).keys()).map((hour) => {
         return (
           <div
@@ -12,7 +16,8 @@ const TimeTable = () => {
             key={hour}>
             {now.getHours() === hour && (
               <div
-                className="absolute z- left-full translate-x-2 w-dvw h-[2px] bg-red-500"
+                ref={ref}
+                className="absolute left-full translate-x-2 w-[85svw] h-[2px] bg-red-500"
                 style={{
                   top: `${(now.getMinutes() / 60) * 100}%`,
                 }}>

@@ -30,7 +30,7 @@ const Calendar = ({
   defaultDate = new Date(),
   locale = enUS,
   enableHotkeys = true,
-  view: _defaultMode = 'month',
+  view: _defaultMode = 'day',
   onEventClick,
   events: defaultEvents = [],
   onChangeView,

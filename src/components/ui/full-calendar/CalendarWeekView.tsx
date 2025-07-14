@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { addDays, setHours, startOfWeek, format, isToday } from 'date-fns';
 import { useCalendar } from './Calendar';
 import EventGroup from './EventGroup';
@@ -37,6 +37,17 @@ const CalendarWeekView = () => {
   );
   const columnRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  const currentTimeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (currentTimeRef.current) {
+      currentTimeRef.current.scrollIntoView({
+        block: 'center',
+        inline: 'start',
+      });
+    }
+  }, [view]);
+
   if (view !== 'week') return null;
 
   return (
@@ -64,7 +75,7 @@ const CalendarWeekView = () => {
       </div>
       <div className="flex flex-1">
         <div className="w-fit">
-          <TimeTable />
+          <TimeTable ref={currentTimeRef} />
         </div>
         <div className="grid grid-cols-7 flex-1">
           {weekDates.map((hours, i) => {

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { setHours } from 'date-fns';
 import { useCalendar } from './Calendar';
 import EventGroup from './EventGroup';
@@ -9,9 +9,18 @@ const CalendarDayView = () => {
   const [cursorY, setCursorY] = useState<number | null>(null);
   const [dragOverY, setDragOverY] = useState<number | null>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
+  const currentTimeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (currentTimeRef.current) {
+      currentTimeRef.current.scrollIntoView({
+        block: 'center',
+        inline: 'start',
+      });
+    }
+  }, [view]);
 
   if (view !== 'day') return null;
-
   const hours = [...Array(24)].map((_, i) => setHours(date, i));
 
   // handleMouseMove removed; logic is now inline with null checks
@@ -23,7 +32,7 @@ const CalendarDayView = () => {
     <div className="flex relative pt-2">
       <div className="flex-1 flex max-h-[80vh] overflow-auto">
         <div className="w-14 shrink-0">
-          <TimeTable />
+          <TimeTable ref={currentTimeRef} />
         </div>
         <div
           className="flex-1 relative cursor-pointer h-max"
