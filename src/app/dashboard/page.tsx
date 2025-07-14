@@ -24,7 +24,7 @@ import { Task } from '@/lib/types';
 const DashboardPage: FC = () => {
   const { status } = useSession();
   const router = useRouter();
-  const [events, setEvents] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
@@ -38,13 +38,11 @@ const DashboardPage: FC = () => {
     fetch('/api/tasks')
       .then((res) => res.json())
       .then((data) => {
-        setEvents(
+        setTasks(
           data.map((task: Task) => ({
-            id: task.id,
+            ...task,
             start: new Date(task.start),
             end: new Date(task.end),
-            title: task.title,
-            color: task.color,
           }))
         );
       });
@@ -56,7 +54,7 @@ const DashboardPage: FC = () => {
       // Optimistically update existing event
       // Save previous state for revert
       let prevEvents: Task[] = [];
-      setEvents((prev) => {
+      setTasks((prev) => {
         prevEvents = prev;
         return prev.map((e) =>
           e.id === task.id
@@ -79,7 +77,7 @@ const DashboardPage: FC = () => {
         });
         if (!res.ok) throw new Error('Failed to update');
         const updated = await res.json();
-        setEvents((prev) =>
+        setTasks((prev) =>
           prev.map((e) =>
             e.id === updated.id
               ? {
@@ -92,7 +90,7 @@ const DashboardPage: FC = () => {
         );
       } catch {
         // Revert optimistic update
-        setEvents(prevEvents);
+        setTasks(prevEvents);
       }
     } else {
       // Optimistically add new event with a temporary id
@@ -106,7 +104,7 @@ const DashboardPage: FC = () => {
       };
       // Save previous state for revert
       let prevEvents: Task[] = [];
-      setEvents((prev) => {
+      setTasks((prev) => {
         prevEvents = prev;
         return [...prev, optimisticEvent];
       });
@@ -119,7 +117,7 @@ const DashboardPage: FC = () => {
         });
         if (!res.ok) throw new Error('Failed to create');
         const newTask = await res.json();
-        setEvents((prev) =>
+        setTasks((prev) =>
           prev.map((e) =>
             e.id === tempId
               ? {
@@ -133,7 +131,7 @@ const DashboardPage: FC = () => {
         );
       } catch {
         // Revert optimistic update
-        setEvents(prevEvents);
+        setTasks(prevEvents);
       }
     }
     setEditingTask(null);
@@ -156,7 +154,7 @@ const DashboardPage: FC = () => {
   };
 
   const handleDeleteTask = async (id: string) => {
-    setEvents((prev) => prev.filter((e) => e.id !== id));
+    setTasks((prev) => prev.filter((e) => e.id !== id));
     setEditingTask(null);
     setModalOpen(false);
     await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
@@ -198,7 +196,7 @@ const DashboardPage: FC = () => {
         </header>
         <section>
           <Calendar
-            events={events}
+            events={tasks}
             onChangeView={() => {}}
             onEventClick={(event) => {
               console.log('[DEBUG] onEventClick', event);
@@ -219,7 +217,7 @@ const DashboardPage: FC = () => {
             onEventDrop={handleEventDrop}
             onEventResize={(eventId, newEnd) => {
               console.log('[DEBUG] onEventResize: ', eventId);
-              const event = events.find((e) => e.id === eventId);
+              const event = tasks.find((e) => e.id === eventId);
               if (!event) return;
               const updatedTask = {
                 ...event,
