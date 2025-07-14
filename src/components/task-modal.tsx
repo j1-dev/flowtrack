@@ -70,6 +70,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       setDescription(initialTask.description || '');
       setPriority(initialTask.priority || 'MEDIUM');
       setRecurrence(initialTask.recurrence || '');
+      setShowRecurrence(!!initialTask.recurrence);
     } else {
       setTitle('');
       setStartDate(undefined);
@@ -143,8 +144,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({
               placeholder="Describe the task..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-2 rounded bg-background border"
+              className="w-full p-2 rounded bg-background border resize-none"
               rows={2}
+              maxLength={500}
             />
           </div>
 
@@ -288,7 +290,12 @@ export const TaskModal: React.FC<TaskModalProps> = ({
               <Label className="flex items-center gap-2 text-sm font-medium">
                 <Checkbox
                   checked={showRecurrence}
-                  onCheckedChange={(val) => setShowRecurrence(val === true)}
+                  onCheckedChange={(val) => {
+                    setShowRecurrence(val === true);
+                    if (val === false) {
+                      setRecurrence('');
+                    }
+                  }}
                   className="accent-primary"
                 />
                 Recurrence
