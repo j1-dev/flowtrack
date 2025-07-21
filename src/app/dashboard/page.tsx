@@ -20,6 +20,7 @@ import {
   CalendarYearView,
 } from '@/components/ui/full-calendar/index';
 import { Task } from '@/lib/types';
+import { Navbar } from '@/components/navbar';
 
 const DashboardPage: FC = () => {
   const { status } = useSession();
@@ -170,12 +171,12 @@ const DashboardPage: FC = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
-      {/* <Navbar
+      <Navbar
         onCreateTask={() => {
           setEditingTask(null);
           setModalOpen(true);
         }}
-      /> */}
+      />
       <TaskModal
         open={modalOpen}
         onClose={() => {
