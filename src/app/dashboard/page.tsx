@@ -5,7 +5,6 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthButtons } from '@/components/auth-buttons';
 import { ThemeSwitcher } from '@/components/theme-switcher';
-// import { Navbar } from '@/components/navbar';
 import { TaskModal } from '@/components/task-modal';
 import {
   Calendar,
@@ -28,11 +27,25 @@ const DashboardPage: FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [width, setWidth] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.replace(`/login?next=/dashboard`);
     }
+
+    // Initialize width and mobile state
+    const handleResize = () => {
+      const newWidth = window.innerWidth;
+      setWidth(newWidth);
+      setIsMobile(newWidth < 768);
+    };
+
+    handleResize(); // Set initial values
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
   }, [status, router]);
 
   useEffect(() => {
@@ -53,7 +66,6 @@ const DashboardPage: FC = () => {
     if (!task.title || !task.start || !task.end) return;
     if (task.id) {
       // Optimistically update existing event
-      // Save previous state for revert
       let prevEvents: Task[] = [];
       setTasks((prev) => {
         prevEvents = prev;
@@ -69,7 +81,7 @@ const DashboardPage: FC = () => {
             : e
         );
       });
-      // Send update to server
+
       try {
         const res = await fetch(`/api/tasks/${task.id}`, {
           method: 'PUT',
@@ -90,7 +102,6 @@ const DashboardPage: FC = () => {
           )
         );
       } catch {
-        // Revert optimistic update
         setTasks(prevEvents);
       }
     } else {
@@ -103,13 +114,13 @@ const DashboardPage: FC = () => {
         start: new Date(task.start),
         end: new Date(task.end),
       };
-      // Save previous state for revert
+
       let prevEvents: Task[] = [];
       setTasks((prev) => {
         prevEvents = prev;
         return [...prev, optimisticEvent];
       });
-      // Send create to server
+
       try {
         const res = await fetch('/api/tasks', {
           method: 'POST',
@@ -131,7 +142,6 @@ const DashboardPage: FC = () => {
           )
         );
       } catch {
-        // Revert optimistic update
         setTasks(prevEvents);
       }
     }
@@ -141,17 +151,16 @@ const DashboardPage: FC = () => {
 
   const handleEventDrop = (task: Task, newStart: Date) => {
     const duration = task.end.getTime() - task.start.getTime();
-    // Ensure newStart uses the original event's date, only updating the time
     const correctedStart = new Date(newStart);
     correctedStart.setHours(newStart.getHours(), newStart.getMinutes(), 0, 0);
     const newEnd = new Date(correctedStart.getTime() + duration);
-    // Update event in state and persist to backend
+
     const updatedTask = {
       ...task,
       start: correctedStart,
       end: newEnd,
     };
-    handleSaveTask(updatedTask as Task); // handleSaveTask expects Task shape
+    handleSaveTask(updatedTask as Task);
   };
 
   const handleDeleteTask = async (id: string) => {
@@ -161,22 +170,29 @@ const DashboardPage: FC = () => {
     await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
   };
 
+  const openNewTaskModal = () => {
+    setEditingTask(null);
+    setModalOpen(true);
+  };
+
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading dashboard...</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex">
-      <Navbar
-        onCreateTask={() => {
-          setEditingTask(null);
-          setModalOpen(true);
-        }}
-      />
+    <div className="min-h-screen bg-background text-foreground flex flex-col lg:flex-row">
+      {/* Navbar - responsive positioning */}
+      <div className="lg:flex-shrink-0">
+        <Navbar tasks={tasks} />
+      </div>
+
       <TaskModal
         open={modalOpen}
         onClose={() => {
@@ -187,15 +203,22 @@ const DashboardPage: FC = () => {
         onDelete={(task) => handleDeleteTask(task.id)}
         initialTask={editingTask}
       />
-      <main className="flex-1 p-8 overflow-auto  transition-all duration-200">
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-black md:ml-0 ml-4">Dashboard</h1>
-          <div className="flex items-center space-x-4">
-            <ThemeSwitcher />
-            <AuthButtons />
+
+      {/* Main content - responsive layout */}
+      <main className="flex-1 flex flex-col min-h-0 lg:overflow-hidden">
+        {/* Header - only show on larger screens since navbar handles mobile */}
+        <header className="hidden lg:block flex-shrink-0 px-8 py-6 border-b border-border/50">
+          <div className="flex items-center justify-between">
+            <h1 className="text-4xl font-black">Dashboard</h1>
+            <div className="flex items-center gap-3">
+              <ThemeSwitcher />
+              <AuthButtons />
+            </div>
           </div>
         </header>
-        <section>
+
+        {/* Calendar section - responsive container */}
+        <section className="flex-1 px-4 sm:px-6 lg:px-8 py-4 lg:py-6 min-h-0 overflow-hidden">
           <Calendar
             events={tasks}
             onChangeView={() => {}}
@@ -226,67 +249,114 @@ const DashboardPage: FC = () => {
               };
               handleSaveTask(updatedTask);
             }}>
-            {/* Responsive calendar header row */}
-            <div className="flex flex-col md:flex-row md:items-center md:gap-2 mb-4">
-              {/* Desktop: all triggers and right-aligned actions in one row */}
-              <div
-                className="hidden md:flex items-center w-full gap-2 overflow-x-auto scrollbar-none -mx-2 px-2 md:mx-0 md:px-0"
-                style={{ WebkitOverflowScrolling: 'touch' }}>
-                <CalendarPrevTrigger>{'<'}</CalendarPrevTrigger>
-                <CalendarTodayTrigger>Today</CalendarTodayTrigger>
-                <CalendarNextTrigger>{'>'}</CalendarNextTrigger>
-                <CalendarViewTrigger view="day">Day</CalendarViewTrigger>
-                <CalendarViewTrigger view="week">Week</CalendarViewTrigger>
-                <CalendarViewTrigger view="month">Month</CalendarViewTrigger>
-                <CalendarViewTrigger view="year">Year</CalendarViewTrigger>
-                <div className="ml-auto flex items-center gap-2">
-                  <span className="font-semibold">
+            {/* Responsive calendar controls */}
+            <div className="mb-4 space-y-3 sm:space-y-0">
+              {/* Mobile: Stack controls vertically */}
+              <div className="block sm:hidden space-y-3">
+                {/* Current date display */}
+                <div className="text-center">
+                  <span className="text-lg font-semibold">
+                    <CalendarCurrentDate />
+                  </span>
+                </div>
+
+                {/* Navigation controls */}
+                <div className="flex justify-center items-center gap-2">
+                  <CalendarPrevTrigger className="px-3 py-2 rounded-md border border-border hover:bg-accent transition-colors">
+                    {'<'}
+                  </CalendarPrevTrigger>
+                  <CalendarTodayTrigger className="px-4 py-2 rounded-md border border-border hover:bg-accent transition-colors font-medium">
+                    Today
+                  </CalendarTodayTrigger>
+                  <CalendarNextTrigger className="px-3 py-2 rounded-md border border-border hover:bg-accent transition-colors">
+                    {'>'}
+                  </CalendarNextTrigger>
+                </div>
+
+                {/* View toggles */}
+                <div className="flex justify-center items-center gap-1">
+                  <CalendarViewTrigger
+                    view="day"
+                    className="flex-1 max-w-16 px-2 py-2 rounded-md text-sm border border-border hover:bg-accent transition-colors text-center">
+                    {width >= 400 ? 'Day' : 'D'}
+                  </CalendarViewTrigger>
+                  <CalendarViewTrigger
+                    view="week"
+                    className="flex-1 max-w-16 px-2 py-2 rounded-md text-sm border border-border hover:bg-accent transition-colors text-center">
+                    {width >= 400 ? 'Week' : 'W'}
+                  </CalendarViewTrigger>
+                  <CalendarViewTrigger
+                    view="month"
+                    className="flex-1 max-w-16 px-2 py-2 rounded-md text-sm border border-border hover:bg-accent transition-colors text-center">
+                    {width >= 400 ? 'Month' : 'M'}
+                  </CalendarViewTrigger>
+                  <CalendarViewTrigger
+                    view="year"
+                    className="flex-1 max-w-16 px-2 py-2 rounded-md text-sm border border-border hover:bg-accent transition-colors text-center">
+                    {width >= 400 ? 'Year' : 'Y'}
+                  </CalendarViewTrigger>
+                </div>
+              </div>
+
+              {/* Desktop/Tablet: Single row layout */}
+              <div className="hidden sm:flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <CalendarPrevTrigger className="px-3 py-2 rounded-md border border-border hover:bg-accent transition-colors">
+                    {'<'}
+                  </CalendarPrevTrigger>
+                  <CalendarTodayTrigger className="px-4 py-2 rounded-md border border-border hover:bg-accent transition-colors font-medium">
+                    Today
+                  </CalendarTodayTrigger>
+                  <CalendarNextTrigger className="px-3 py-2 rounded-md border border-border hover:bg-accent transition-colors">
+                    {'>'}
+                  </CalendarNextTrigger>
+
+                  <div className="ml-4 flex items-center gap-1">
+                    <CalendarViewTrigger
+                      view="day"
+                      className="px-3 py-2 rounded-md text-sm border border-border hover:bg-accent transition-colors">
+                      {width >= 1024 ? 'Day' : 'D'}
+                    </CalendarViewTrigger>
+                    <CalendarViewTrigger
+                      view="week"
+                      className="px-3 py-2 rounded-md text-sm border border-border hover:bg-accent transition-colors">
+                      {width >= 1024 ? 'Week' : 'W'}
+                    </CalendarViewTrigger>
+                    <CalendarViewTrigger
+                      view="month"
+                      className="px-3 py-2 rounded-md text-sm border border-border hover:bg-accent transition-colors">
+                      {width >= 1024 ? 'Month' : 'M'}
+                    </CalendarViewTrigger>
+                    <CalendarViewTrigger
+                      view="year"
+                      className="px-3 py-2 rounded-md text-sm border border-border hover:bg-accent transition-colors">
+                      {width >= 1024 ? 'Year' : 'Y'}
+                    </CalendarViewTrigger>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <span className="font-semibold text-lg">
                     <CalendarCurrentDate />
                   </span>
                   <button
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium"
-                    onClick={() => {
-                      setEditingTask(null);
-                      setModalOpen(true);
-                    }}
+                    className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium whitespace-nowrap"
+                    onClick={openNewTaskModal}
                     type="button">
-                    + New Task
+                    {width >= 1024 ? '+ New Task' : '+ Task'}
                   </button>
                 </div>
               </div>
-              {/* Mobile: nav triggers row */}
-              <div
-                className="flex md:hidden items-center gap-1 overflow-x-auto scrollbar-none -mx-2 px-2"
-                style={{ WebkitOverflowScrolling: 'touch' }}>
-                <CalendarPrevTrigger>{'<'}</CalendarPrevTrigger>
-                <CalendarTodayTrigger>Today</CalendarTodayTrigger>
-                <CalendarNextTrigger>{'>'}</CalendarNextTrigger>
-                <span className="ml-auto font-semibold">
-                  <CalendarCurrentDate />
-                </span>
-              </div>
-              {/* Mobile: view triggers row */}
-              <div
-                className="flex md:hidden items-center gap-1 mt-2 overflow-x-auto scrollbar-none -mx-2 px-2"
-                style={{ WebkitOverflowScrolling: 'touch' }}>
-                <CalendarViewTrigger view="day">Day</CalendarViewTrigger>
-                <CalendarViewTrigger view="week">Week</CalendarViewTrigger>
-                <CalendarViewTrigger view="month">Month</CalendarViewTrigger>
-                <CalendarViewTrigger view="year">Year</CalendarViewTrigger>
-              </div>
             </div>
-            {/* Floating New Task button for mobile */}
-            <button
-              className="fixed bottom-6 right-6 z-50 md:hidden flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg w-14 h-14 text-3xl font-bold hover:bg-primary/90 transition-colors"
-              onClick={() => {
-                setEditingTask(null);
-                setModalOpen(true);
-              }}
-              type="button"
-              aria-label="New Task">
-              +
-            </button>
-            <div className="h-[80vh]">
+
+            {/* Calendar views container - responsive height */}
+            <div
+              className="flex-1 min-h-0"
+              style={{
+                height: isMobile
+                  ? 'calc(100vh - 280px)' // Account for mobile header + controls
+                  : 'calc(100vh - 240px)', // Account for desktop header + controls
+              }}>
               <CalendarDayView />
               <CalendarWeekView />
               <CalendarMonthView />

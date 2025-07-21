@@ -51,7 +51,7 @@ const CalendarWeekView = () => {
   if (view !== 'week') return null;
 
   return (
-    <div className="flex flex-col relative overflow-auto h-full">
+    <div className="flex flex-col relative overflow-auto max-h-[80vh]">
       <div className="flex sticky top-0 bg-card z-10 border-b mb-3">
         <div className="w-12"></div>
         {headerDays.map((date, i) => (

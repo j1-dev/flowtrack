@@ -3,17 +3,17 @@
 import { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
-import { Home, Menu, CalendarDays, CheckSquare, Plus, X } from 'lucide-react';
+import { Home, Menu, CalendarDays, CheckSquare, X } from 'lucide-react';
 import { Task } from '@/lib/types';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { Separator } from '@/components/ui/separator';
 
 interface NavbarProps {
-  onCreateTask: () => void;
   tasks?: Task[];
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onCreateTask, tasks = [] }) => {
+export const Navbar: React.FC<NavbarProps> = ({ tasks = [] }) => {
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [date, setDate] = useState<Date>(new Date());
@@ -30,7 +30,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onCreateTask, tasks = [] }) => {
     .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
   return (
-    <div className="">
+    <>
       {/* Mobile menu button (fixed, top left) */}
       <button
         className="w-6 h-6 absolute top-[30px] left-4 z-40 md:hidden p-2"
@@ -55,19 +55,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onCreateTask, tasks = [] }) => {
         className={`fixed top-0 left-0 h-screen bg-card border-r border-border z-50 flex flex-col transition-transform duration-300
           ${open ? 'translate-x-0' : '-translate-x-full'}
           md:static md:translate-x-0 md:flex
-          ${collapsed ? 'w-16' : 'w-64'} md:transition-all md:translate-x-0`}
+          ${collapsed ? 'w-14' : 'w-64'} md:transition-all md:translate-x-0`}
         aria-label="Sidebar">
-        <div className="h-full flex flex-col p-4">
+        <div className="h-full flex flex-col">
           {/* Logo/Title */}
-          <div className="flex items-center justify-between mb-6 pt-2">
+          <div className="flex items-center justify-between mb-4 pt-5 ">
             {!collapsed && (
-              <h1 className="text-xl font-bold ml-2">FlowTrack</h1>
+              <h1 className="text-2xl font-bold ml-4">FlowTrack</h1>
             )}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setCollapsed((c) => !c)}
-              className="hidden md:flex">
+              className="hidden md:flex ml-2">
               {collapsed ? (
                 <Menu className="w-5 h-5" />
               ) : (
@@ -82,9 +82,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onCreateTask, tasks = [] }) => {
               <X className="w-5 h-5" />
             </Button>
           </div>
-
+          <Separator className={collapsed ? 'hidden' : 'flex'} />
           {/* Navigation Links */}
-          <nav className="space-y-2 mb-6">
+          <nav className="space-y-2 mb-4 mx-2 pt-2">
             <Link
               href="/dashboard"
               className="flex items-center space-x-2 p-2 rounded-lg hover:bg-accent">
@@ -104,15 +104,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onCreateTask, tasks = [] }) => {
               {!collapsed && <span>Habits</span>}
             </Link>
           </nav>
-
+          <Separator className={collapsed ? 'hidden' : 'flex'} />
           <>
             {/* Mini Calendar */}
             <div
-              className={`mb-6 ${
+              className={` ${
                 collapsed
                   ? 'opacity-0 -translate-x-60'
                   : 'opacity-100 translate-x-0'
-              } transition-all ease-in duration-150`}>
+              } transition-all ease-in duration-150 ml-2`}>
               <Calendar
                 mode="single"
                 selected={date}
@@ -120,6 +120,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onCreateTask, tasks = [] }) => {
                 className="rounded-md border scale-90 -translate-x-2"
               />
             </div>
+            <Separator className={collapsed ? 'hidden' : 'flex'} />
 
             {/* Upcoming Tasks */}
             <div
@@ -128,13 +129,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onCreateTask, tasks = [] }) => {
                   ? 'opacity-0 -translate-x-60'
                   : 'opacity-100 translate-x-0'
               }`}>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold ml-2">Upcoming Tasks</h2>
-                <Button variant="ghost" size="icon" onClick={onCreateTask}>
-                  <Plus className="w-4 h-4" />
-                </Button>
+              <div className="flex items-center justify-between my-4">
+                <h2 className="font-semibold ml-4">Upcoming Tasks</h2>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 px-4">
                 {upcomingTasks.map((task) => (
                   <div
                     key={task.id}
@@ -153,6 +151,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onCreateTask, tasks = [] }) => {
           </>
         </div>
       </nav>
-    </div>
+    </>
   );
 };
