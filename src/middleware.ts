@@ -31,10 +31,10 @@ export async function middleware(request: NextRequest) {
   const isApiRoute = pathname.startsWith('/api');
   const isHomeRoute = pathname === '/';
 
-  // 2a) If a signed-in user hits '/', redirect to dashboard
+  // 2a) If a signed-in user hits '/', redirect to calendar
   if (isAuthenticated && isHomeRoute) {
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    url.pathname = '/calendar';
     return NextResponse.redirect(url);
   }
 
@@ -46,7 +46,7 @@ export async function middleware(request: NextRequest) {
   // 4) Redirect signed-in users away from login/signup
   if (isAuthenticated && isAuthRoute) {
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    url.pathname = '/calendar';
     return NextResponse.redirect(url);
   }
 

@@ -86,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({ tasks = [] }) => {
           {/* Navigation Links */}
           <nav className="space-y-2 mb-4 mx-2 pt-2">
             <Link
-              href="/dashboard"
+              href="/overview"
               className={`flex items-center space-x-3 ${
                 collapsed
                   ? 'pt-3 p-1 pl-2'
