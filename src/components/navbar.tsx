@@ -67,9 +67,9 @@ export const Navbar: React.FC<NavbarProps> = ({ tasks = [] }) => {
               variant="ghost"
               size="icon"
               onClick={() => setCollapsed((c) => !c)}
-              className="hidden md:flex ml-2">
+              className="hidden md:flex mx-2">
               {collapsed ? (
-                <Menu className="w-5 h-5" />
+                <Menu className="w-9 h-9" />
               ) : (
                 <X className="w-5 h-5" />
               )}
@@ -82,25 +82,37 @@ export const Navbar: React.FC<NavbarProps> = ({ tasks = [] }) => {
               <X className="w-5 h-5" />
             </Button>
           </div>
-          <Separator className={collapsed ? 'hidden' : 'flex'} />
+          <Separator />
           {/* Navigation Links */}
           <nav className="space-y-2 mb-4 mx-2 pt-2">
             <Link
               href="/dashboard"
-              className="flex items-center space-x-2 p-2 rounded-lg hover:bg-accent">
-              <Home className="w-5 h-5" />
+              className={`flex items-center space-x-3 ${
+                collapsed
+                  ? 'pt-3 p-1 pl-2'
+                  : 'p-3 pl-2 border border-transparent hover:border-border hover:bg-accent '
+              }rounded-lg `}>
+              <Home className="w-7 h-7" />
               {!collapsed && <span>Overview</span>}
             </Link>
             <Link
               href="/calendar"
-              className="flex items-center space-x-2 p-2 rounded-lg hover:bg-accent">
-              <CalendarDays className="w-5 h-5" />
+              className={`flex items-center space-x-3 ${
+                collapsed
+                  ? 'pt-3 p-1 pl-2'
+                  : 'p-3 pl-2 border border-transparent hover:border-border hover:bg-accent '
+              }rounded-lg `}>
+              <CalendarDays className="w-7 h-7" />
               {!collapsed && <span>Calendar</span>}
             </Link>
             <Link
               href="/habits"
-              className="flex items-center space-x-2 p-2 rounded-lg hover:bg-accent">
-              <CheckSquare className="w-5 h-5" />
+              className={`flex items-center space-x-3 ${
+                collapsed
+                  ? 'pt-3 p-1 pl-2'
+                  : 'p-3 pl-2 border border-transparent hover:border-border hover:bg-accent '
+              }rounded-lg `}>
+              <CheckSquare className="w-7 h-7" />
               {!collapsed && <span>Habits</span>}
             </Link>
           </nav>
@@ -116,7 +128,11 @@ export const Navbar: React.FC<NavbarProps> = ({ tasks = [] }) => {
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={(date) => date && setDate(date)}
+                onSelect={(date) => {
+                  if (date) {
+                    setDate(date);
+                  }
+                }}
                 className="rounded-md border scale-90 -translate-x-2"
               />
             </div>

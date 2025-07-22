@@ -99,6 +99,7 @@ const CalendarMonthView = () => {
                 )}
                 onClick={(e: React.MouseEvent<HTMLSpanElement>) => {
                   e.stopPropagation();
+                  console.log(setView, setDate)
                   setView('day');
                   setDate(_date);
                 }}>

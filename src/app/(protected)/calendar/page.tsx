@@ -3,8 +3,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { AuthButtons } from '@/components/auth-buttons';
-import { ThemeSwitcher } from '@/components/theme-switcher';
 import { TaskModal } from '@/components/task-modal';
 import {
   Calendar,
@@ -20,7 +18,7 @@ import {
 } from '@/components/ui/full-calendar/index';
 import { Task } from '@/lib/types';
 
-const DashboardPage: FC = () => {
+const CalendarPage: FC = () => {
   const { status } = useSession();
   const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -179,15 +177,14 @@ const DashboardPage: FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-2">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading dashboard...</p>
+          <p className="text-muted-foreground">Loading Calendar...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col lg:flex-row">
-
+    <div className="h-full bg-background text-foreground flex flex-col">
       <TaskModal
         open={modalOpen}
         onClose={() => {
@@ -201,19 +198,8 @@ const DashboardPage: FC = () => {
 
       {/* Main content - responsive layout */}
       <main className="flex-1 flex flex-col min-h-0 lg:overflow-hidden">
-        {/* Header - only show on larger screens since navbar handles mobile */}
-        <header className="hidden lg:block flex-shrink-0 px-8 py-6 border-b border-border/50">
-          <div className="flex items-center justify-between">
-            <h1 className="text-4xl font-black">Dashboard</h1>
-            <div className="flex items-center gap-3">
-              <ThemeSwitcher />
-              <AuthButtons />
-            </div>
-          </div>
-        </header>
-
         {/* Calendar section - responsive container */}
-        <section className="flex-1 px-4 sm:px-6 lg:px-8 py-4 lg:py-6 min-h-0 overflow-hidden">
+        <section className="flex-1 px-4 sm:px-6 lg:px-0 py-4 lg:py-0 min-h-0 overflow-hidden">
           <Calendar
             events={tasks}
             onChangeView={() => {}}
@@ -349,7 +335,7 @@ const DashboardPage: FC = () => {
               className="flex-1 min-h-0"
               style={{
                 height: isMobile
-                  ? 'calc(100vh - 280px)' // Account for mobile header + controls
+                  ? 'calc(100vh)' // Account for mobile header + controls
                   : 'calc(100vh - 240px)', // Account for desktop header + controls
               }}>
               <CalendarDayView />
@@ -364,4 +350,4 @@ const DashboardPage: FC = () => {
   );
 };
 
-export default DashboardPage;
+export default CalendarPage;
