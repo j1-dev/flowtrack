@@ -8,15 +8,19 @@ import { Task } from '@/lib/types';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
+import { useCalendar } from '@/components/ui/full-calendar/Calendar';
+import { useRouter } from 'next/navigation';
 
 interface NavbarProps {
   tasks?: Task[];
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ tasks = [] }) => {
+  const router = useRouter();
+  const { setView, setDate } = useCalendar();
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const [date, setDate] = useState<Date>(new Date());
+  const [clickedDate, setClickedDate] = useState<Date>(new Date());
 
   // Filter tasks that are coming up (next 7 days)
   const upcomingTasks = tasks
@@ -127,9 +131,13 @@ export const Navbar: React.FC<NavbarProps> = ({ tasks = [] }) => {
               } transition-all ease-in duration-150 ml-2`}>
               <Calendar
                 mode="single"
-                selected={date}
+                selected={clickedDate}
                 onSelect={(date) => {
                   if (date) {
+                    console.log(date);
+                    setClickedDate(date);
+                    router.push('/calendar');
+                    setView('day');
                     setDate(date);
                   }
                 }}
