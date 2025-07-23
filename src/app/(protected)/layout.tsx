@@ -140,6 +140,12 @@ export default function ProtectedLayout({
     await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
   };
 
+  const handleUpcomingEventClick = (task: Task): void => {
+    console.log(task);
+    setEditingTask(task);
+    setModalOpen(true);
+  };
+
   // const openNewTaskModal = () => {
   //   setEditingTask(null);
   //   setModalOpen(true);
@@ -189,7 +195,10 @@ export default function ProtectedLayout({
       <div className="min-h-screen bg-background text-foreground flex flex-col lg:flex-row">
         {/* Navbar - responsive positioning */}
         <div className="lg:flex-shrink-0">
-          <Navbar tasks={tasks || []} />
+          <Navbar
+            tasks={tasks}
+            onUpcomingEventClick={handleUpcomingEventClick}
+          />
         </div>
 
         {/* Main content - responsive layout */}

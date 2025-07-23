@@ -12,10 +12,14 @@ import { useCalendar } from '@/components/ui/full-calendar/Calendar';
 import { useRouter } from 'next/navigation';
 
 interface NavbarProps {
-  tasks?: Task[];
+  tasks: Task[];
+  onUpcomingEventClick: (task: Task) => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ tasks = [] }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  tasks = [],
+  onUpcomingEventClick,
+}) => {
   const router = useRouter();
   const { setView, setDate } = useCalendar();
   const [open, setOpen] = useState(false);
@@ -161,6 +165,7 @@ export const Navbar: React.FC<NavbarProps> = ({ tasks = [] }) => {
                   <div
                     key={task.id}
                     className="p-2 rounded-lg bg-accent/50 hover:bg-accent cursor-pointer"
+                    onClick={() => onUpcomingEventClick(task)}
                     style={{
                       borderLeft: `4px solid ${task.color || '#888'}`,
                     }}>
