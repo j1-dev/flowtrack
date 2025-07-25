@@ -119,6 +119,35 @@ export default function ProtectedLayout({
     setModalOpen(false);
   };
 
+  const handleDeleteTask = async (task: Task) => {
+    setTasks((prev) => prev.filter((e) => e.id !== task.id));
+    setEditingTask(null);
+    setModalOpen(false);
+    await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' });
+  };
+
+  const handleUpcomingEventClick = (task: Task): void => {
+    console.log(task);
+    setEditingTask(task);
+    setModalOpen(true);
+  };
+
+  const handleEventClick = (task: Task) => {
+    setEditingTask(task);
+    setModalOpen(true);
+  };
+
+  const handleCreateAtTime = (date: Date) => {
+    setEditingTask({
+      id: '',
+      title: '',
+      start: date,
+      end: new Date(date.getTime() + 60 * 60 * 1000),
+      color: '#6366f1',
+    } as Task);
+    setModalOpen(true);
+  };
+
   const handleEventDrop = (task: Task, newStart: Date) => {
     const duration = task.end.getTime() - task.start.getTime();
     const correctedStart = new Date(newStart);
@@ -133,55 +162,24 @@ export default function ProtectedLayout({
     handleSaveTask(updatedTask as Task);
   };
 
-  const handleDeleteTask = async (id: string) => {
-    setTasks((prev) => prev.filter((e) => e.id !== id));
-    setEditingTask(null);
-    setModalOpen(false);
-    await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
-  };
-
-  const handleUpcomingEventClick = (task: Task): void => {
-    console.log(task);
-    setEditingTask(task);
-    setModalOpen(true);
-  };
-
-  // const openNewTaskModal = () => {
-  //   setEditingTask(null);
-  //   setModalOpen(true);
-  // };
+  const handleEventResize = (eventId: string, newEnd: Date) => {
+    const event = tasks?.find((e) => e.id === eventId);
+    if (!event) return;
+    const updatedTask = {
+      ...event,
+      end: newEnd,
+    };
+    handleSaveTask(updatedTask);
+  }
 
   return (
     <Calendar
       events={tasks || []}
       onChangeView={() => {}}
-      onEventClick={(event) => {
-        console.log('[DEBUG] onEventClick', event);
-        setEditingTask(event as Task);
-        setModalOpen(true);
-      }}
-      onCreateAtTime={(date) => {
-        console.log('[DEBUG] onCreateAtTime', date);
-        setEditingTask({
-          id: '',
-          title: '',
-          start: date,
-          end: new Date(date.getTime() + 60 * 60 * 1000),
-          color: '#6366f1',
-        } as Task);
-        setModalOpen(true);
-      }}
+      onEventClick={handleEventClick}
+      onCreateAtTime={handleCreateAtTime}
       onEventDrop={handleEventDrop}
-      onEventResize={(eventId, newEnd) => {
-        console.log('[DEBUG] onEventResize: ', eventId);
-        const event = tasks?.find((e) => e.id === eventId);
-        if (!event) return;
-        const updatedTask = {
-          ...event,
-          end: newEnd,
-        };
-        handleSaveTask(updatedTask);
-      }}>
+      onEventResize={handleEventResize}>
       <TaskModal
         open={modalOpen}
         onClose={() => {
@@ -189,7 +187,7 @@ export default function ProtectedLayout({
           setEditingTask(null);
         }}
         onSave={handleSaveTask}
-        onDelete={(task) => handleDeleteTask(task.id)}
+        onDelete={handleDeleteTask}
         initialTask={editingTask}
       />
       <div className="min-h-screen bg-background text-foreground flex flex-col lg:flex-row">
