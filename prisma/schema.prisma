@@ -17,7 +17,7 @@ enum Frequency {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  // directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -47,7 +47,6 @@ model Task {
   goalId      String?
   goal        Goal?    @relation(fields: [goalId], references: [id])
   priority    Priority @default(MEDIUM)
-  recurrence  String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
 

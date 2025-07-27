@@ -26,7 +26,6 @@ export type Task = {
   goalId?: string | null;
   goal?: Goal | null;
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
-  recurrence?: string | null;
   createdAt: Date;
   updatedAt: Date;
 };

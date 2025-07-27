@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
+// import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Task, Goal } from '@/lib/types';
 
@@ -54,8 +54,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   const [color, setColor] = useState<string>('#6366f1'); // Default to indigo-500
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<'LOW' | 'MEDIUM' | 'HIGH'>('MEDIUM');
-  const [recurrence, setRecurrence] = useState('');
-  const [showRecurrence, setShowRecurrence] = useState(false);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
 
@@ -81,8 +79,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       setColor(initialTask.color || '#6366f1');
       setDescription(initialTask.description || '');
       setPriority(initialTask.priority || 'MEDIUM');
-      setRecurrence(initialTask.recurrence || '');
-      setShowRecurrence(!!initialTask.recurrence);
       setSelectedGoalId(initialTask.goalId || null);
     } else {
       setTitle('');
@@ -95,7 +91,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       setColor('#6366f1');
       setDescription('');
       setPriority('MEDIUM');
-      setRecurrence('');
     }
   }, [initialTask, open]);
 
@@ -125,7 +120,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       color,
       description,
       priority,
-      recurrence,
       goalId: selectedGoalId,
     } as Task);
     onClose();
@@ -323,46 +317,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2 text-sm font-medium">
-                <Checkbox
-                  checked={showRecurrence}
-                  onCheckedChange={(val) => {
-                    setShowRecurrence(val === true);
-                    if (val === false) {
-                      setRecurrence('');
-                    }
-                  }}
-                  className="accent-primary"
-                />
-                Recurrence
-              </Label>
-              {showRecurrence && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-between">
-                      {recurrence
-                        ? recurrence.charAt(0).toUpperCase() +
-                          recurrence.slice(1)
-                        : 'Select recurrence'}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-full min-w-[8rem]">
-                    <DropdownMenuItem onSelect={() => setRecurrence('Daily')}>
-                      Daily
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setRecurrence('Weekly')}>
-                      Weekly
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setRecurrence('Monthly')}>
-                      Monthly
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
             </div>
           </div>
 

@@ -43,7 +43,6 @@ export async function createTask(
     color?: string;
     description?: string;
     priority?: 'LOW' | 'MEDIUM' | 'HIGH';
-    recurrence?: string;
     goalId?: string | null;
   }
 ) {
@@ -61,7 +60,6 @@ export async function updateTaskById(
     color?: string;
     description?: string;
     priority?: 'LOW' | 'MEDIUM' | 'HIGH';
-    recurrence?: string;
     goalId?: string | null;
   }
 ) {

@@ -32,7 +32,6 @@ export default function ProtectedLayout({
       });
   }, []);
 
-  // TODO: check this function to properly save a task with a goalId attached to it
   const handleSaveTask = async (task: Task) => {
     console.log(task);
     if (!task.title || !task.start || !task.end) return;
