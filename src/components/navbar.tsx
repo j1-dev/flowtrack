@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
-import { Home, Menu, CalendarDays, CheckSquare, X } from 'lucide-react';
+import { Home, Menu, CalendarDays, CheckSquare, X, Flag } from 'lucide-react';
 import { Task } from '@/lib/types';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
 import { useCalendar } from '@/components/ui/full-calendar/Calendar';
 import { useRouter } from 'next/navigation';
+
 
 interface NavbarProps {
   tasks: Task[];
@@ -122,6 +123,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               }rounded-lg `}>
               <CheckSquare className="w-7 h-7" />
               {!collapsed && <span>Habits</span>}
+            </Link>
+            <Link
+              href="/goals"
+              className={`flex items-center space-x-3 ${
+                collapsed
+                  ? 'pt-3 p-1 pl-2'
+                  : 'p-3 pl-2 border border-transparent hover:border-border hover:bg-accent '
+              }rounded-lg `}>
+              <Flag className="w-7 h-7" />
+              {!collapsed && <span>Goals</span>}
             </Link>
           </nav>
           <Separator className={collapsed ? 'hidden' : 'flex'} />

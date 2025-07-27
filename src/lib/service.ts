@@ -44,6 +44,7 @@ export async function createTask(
     description?: string;
     priority?: 'LOW' | 'MEDIUM' | 'HIGH';
     recurrence?: string;
+    goalId?: string | null;
   }
 ) {
   return prisma.task.create({
@@ -61,6 +62,7 @@ export async function updateTaskById(
     description?: string;
     priority?: 'LOW' | 'MEDIUM' | 'HIGH';
     recurrence?: string;
+    goalId?: string | null;
   }
 ) {
   return prisma.task.update({
@@ -108,4 +110,87 @@ export async function updateHabitById(
 
 export async function deleteHabitById(id: string) {
   return prisma.habit.delete({ where: { id } });
+}
+
+/** ===========================
+ *            GOALS
+ *  =========================== */
+
+export async function getGoalsByUserId(userId: string) {
+  return prisma.goal.findMany({
+    where: { userId },
+    orderBy: { name: 'asc' },
+    include: {
+      tasks: true,
+      habits: true,
+    },
+  });
+}
+
+export async function getGoalById(id: string) {
+  return prisma.goal.findUnique({
+    where: { id },
+    include: {
+      tasks: true,
+      habits: true,
+    },
+  });
+}
+
+export async function createGoal(
+  userId: string,
+  data: {
+    name: string;
+    description?: string;
+  }
+) {
+  return prisma.goal.create({
+    data: { ...data, userId },
+  });
+}
+
+export async function updateGoalById(
+  id: string,
+  data: {
+    name?: string;
+    description?: string;
+  }
+) {
+  return prisma.goal.update({
+    where: { id },
+    data,
+  });
+}
+
+export async function deleteGoalById(id: string) {
+  return prisma.goal.delete({ where: { id } });
+}
+
+// Helper functions to associate/dissociate tasks and habits with goals
+export async function attachTaskToGoal(taskId: string, goalId: string) {
+  return prisma.task.update({
+    where: { id: taskId },
+    data: { goalId },
+  });
+}
+
+export async function detachTaskFromGoal(taskId: string) {
+  return prisma.task.update({
+    where: { id: taskId },
+    data: { goalId: null },
+  });
+}
+
+export async function attachHabitToGoal(habitId: string, goalId: string) {
+  return prisma.habit.update({
+    where: { id: habitId },
+    data: { goalId },
+  });
+}
+
+export async function detachHabitFromGoal(habitId: string) {
+  return prisma.habit.update({
+    where: { id: habitId },
+    data: { goalId: null },
+  });
 }

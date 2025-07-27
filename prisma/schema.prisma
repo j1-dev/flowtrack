@@ -31,6 +31,7 @@ model User {
   habits        Habit[]
   sessions      Session[]
   tasks         Task[]
+  goals         Goal[]
 }
 
 model Task {
@@ -43,7 +44,8 @@ model Task {
   userId      String
   user        User     @relation(fields: [userId], references: [id])
   completed   Boolean  @default(false)
-  tags        Tag[]
+  goalId      String?
+  goal        Goal?    @relation(fields: [goalId], references: [id])
   priority    Priority @default(MEDIUM)
   recurrence  String?
   createdAt   DateTime @default(now())
@@ -51,6 +53,7 @@ model Task {
 
   @@index([completed])
   @@index([userId])
+  @@index([goalId])
 }
 
 model Habit {
@@ -60,15 +63,26 @@ model Habit {
   streak    Int       @default(0)
   userId    String
   user      User      @relation(fields: [userId], references: [id])
+  goalId    String?
+  goal      Goal?     @relation(fields: [goalId], references: [id])
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  @@index([goalId])
 }
 
-model Tag {
-  id    String @id @default(cuid())
-  name  String @unique
-  color String @default("#000000")
-  tasks Task[]
+model Goal {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  tasks       Task[]
+  habits      Habit[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model Account {

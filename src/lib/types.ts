@@ -10,6 +10,7 @@ export type User = {
 
   tasks: Task[];
   habits: Habit[];
+  goals: Goal[];
 };
 
 export type Task = {
@@ -22,7 +23,8 @@ export type Task = {
   userId: string;
   user: User;
   completed: boolean;
-  tags?: Tag[];
+  goalId?: string | null;
+  goal?: Goal | null;
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
   recurrence?: string | null;
   createdAt: Date;
@@ -36,14 +38,21 @@ export type Habit = {
   streak: number;
   userId: string;
   user: User;
+  goalId?: string | null;
+  goal?: Goal | null;
   createdAt: Date;
   updatedAt: Date;
 };
 
-export type Tag = {
+export type Goal = {
   id: string;
   name: string;
-  color: string;
-  tasks?: Task[];
+  description?: string | null;
+  userId: string;
+  user: User;
+  tasks: Task[];
+  habits: Habit[];
+  createdAt: Date;
+  updatedAt: Date;
 };
 // You can also add types for Account, Session, and VerificationToken if needed

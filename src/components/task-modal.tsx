@@ -26,7 +26,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Task } from '@/lib/types';
+import { Task, Goal } from '@/lib/types';
 
 interface TaskModalProps {
   open: boolean;
@@ -56,6 +56,18 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   const [priority, setPriority] = useState<'LOW' | 'MEDIUM' | 'HIGH'>('MEDIUM');
   const [recurrence, setRecurrence] = useState('');
   const [showRecurrence, setShowRecurrence] = useState(false);
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
+
+  // Fetch goals when modal opens
+  useEffect(() => {
+    if (open) {
+      fetch('/api/goals')
+        .then((res) => res.json())
+        .then((data) => setGoals(data))
+        .catch((error) => console.error('Error fetching goals:', error));
+    }
+  }, [open]);
 
   useEffect(() => {
     if (initialTask) {
@@ -71,6 +83,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       setPriority(initialTask.priority || 'MEDIUM');
       setRecurrence(initialTask.recurrence || '');
       setShowRecurrence(!!initialTask.recurrence);
+      setSelectedGoalId(initialTask.goalId || null);
     } else {
       setTitle('');
       setStartDate(undefined);
@@ -113,6 +126,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       description,
       priority,
       recurrence,
+      goalId: selectedGoalId,
     } as Task);
     onClose();
   };
@@ -283,6 +297,30 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                   <DropdownMenuItem onSelect={() => setPriority('HIGH')}>
                     High
                   </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="block text-sm font-medium">Goal</Label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between">
+                    {goals.find((g) => g.id === selectedGoalId)?.name ||
+                      'No goal'}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full min-w-[8rem]">
+                  <DropdownMenuItem onSelect={() => setSelectedGoalId(null)}>
+                    No goal
+                  </DropdownMenuItem>
+                  {goals.map((goal) => (
+                    <DropdownMenuItem
+                      key={goal.id}
+                      onSelect={() => setSelectedGoalId(goal.id)}>
+                      {goal.name}
+                    </DropdownMenuItem>
+                  ))}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

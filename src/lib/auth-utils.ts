@@ -1,5 +1,10 @@
 import { auth } from '@/lib/auth';
-import { getUserByEmail, getTaskById, getHabitById } from './service';
+import {
+  getUserByEmail,
+  getTaskById,
+  getHabitById,
+  getGoalById,
+} from './service';
 import { NextResponse } from 'next/server';
 
 export async function requireSession() {
@@ -15,12 +20,22 @@ export async function requireSession() {
 }
 
 export async function verifyOwnership(
-  model: 'task' | 'habit',
+  model: 'task' | 'habit' | 'goal',
   id: string,
   userId: string
 ) {
-  const resource =
-    model === 'task' ? await getTaskById(id) : await getHabitById(id);
+  let resource;
+  switch (model) {
+    case 'task':
+      resource = await getTaskById(id);
+      break;
+    case 'habit':
+      resource = await getHabitById(id);
+      break;
+    case 'goal':
+      resource = await getGoalById(id);
+      break;
+  }
 
   if (!resource || resource.userId !== userId) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
