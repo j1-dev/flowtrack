@@ -109,7 +109,9 @@ const EventGroup = ({
                 textDecoration: event.completed ? 'line-through' : 'none',
               }}>
               {event.title}
-              <CircleCheck className='absolute bottom-2 right-2 text-black'/>
+              {event.completed && (
+                <CircleCheck className="absolute bottom-2 right-2 text-black" />
+              )}
               {showResizeHandle && (
                 <div
                   className="z-10 absolute left-0 right-0 bottom-0 h-1 cursor-ns-resize group-hover:bg-black/20"
