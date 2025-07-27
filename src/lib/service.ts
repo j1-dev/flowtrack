@@ -61,6 +61,7 @@ export async function updateTaskById(
     description?: string;
     priority?: 'LOW' | 'MEDIUM' | 'HIGH';
     goalId?: string | null;
+    completed?: boolean;
   }
 ) {
   return prisma.task.update({

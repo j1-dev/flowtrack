@@ -22,6 +22,7 @@ export default function ProtectedLayout({
     fetch('/api/tasks')
       .then((res) => res.json())
       .then((data) => {
+        console.log(data);
         setTasks(
           data.map((task: Task) => ({
             ...task,

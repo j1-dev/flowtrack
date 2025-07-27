@@ -36,6 +36,11 @@ interface TaskModalProps {
   initialTask?: Task | null;
 }
 
+// Helper function to check if fields should be disabled
+const isFieldDisabled = (task: Task | null | undefined) => {
+  return task?.completed || false;
+};
+
 export const TaskModal: React.FC<TaskModalProps> = ({
   open,
   onClose,
@@ -144,6 +149,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
               onChange={(e) => setTitle(e.target.value)}
               className="w-full p-2 rounded bg-background border"
               required
+              disabled={isFieldDisabled(initialTask)}
             />
           </div>
           <div className="space-y-2">
@@ -155,6 +161,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
               className="w-full p-2 rounded bg-background border resize-none"
               rows={2}
               maxLength={500}
+              disabled={isFieldDisabled(initialTask)}
             />
           </div>
 
@@ -164,7 +171,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
               <Label className="block text-sm font-medium">Start</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-between"
+                    disabled={isFieldDisabled(initialTask)}>
                     {startDate ? startDate.toLocaleDateString() : 'Pick a date'}
                   </Button>
                 </PopoverTrigger>
@@ -174,13 +184,17 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                     selected={startDate}
                     onSelect={setStartDate}
                     initialFocus
+                    disabled={isFieldDisabled(initialTask)}
                   />
                 </PopoverContent>
               </Popover>
               <div className="flex gap-2 mt-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-14 justify-between">
+                    <Button
+                      variant="outline"
+                      className="w-14 justify-between"
+                      disabled={isFieldDisabled(initialTask)}>
                       {startHour}
                     </Button>
                   </DropdownMenuTrigger>
@@ -197,7 +211,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 <span className="self-center">:</span>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-14 justify-between">
+                    <Button
+                      variant="outline"
+                      className="w-14 justify-between"
+                      disabled={isFieldDisabled(initialTask)}>
                       {startMinute}
                     </Button>
                   </DropdownMenuTrigger>
@@ -217,7 +234,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
               <Label className="block text-sm font-medium">End</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-between"
+                    disabled={isFieldDisabled(initialTask)}>
                     {endDate ? endDate.toLocaleDateString() : 'Pick a date'}
                   </Button>
                 </PopoverTrigger>
@@ -226,13 +246,17 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                     mode="single"
                     selected={endDate}
                     onSelect={setEndDate}
+                    disabled={isFieldDisabled(initialTask)}
                   />
                 </PopoverContent>
               </Popover>
               <div className="flex gap-2 mt-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-14 justify-between">
+                    <Button
+                      variant="outline"
+                      className="w-14 justify-between"
+                      disabled={isFieldDisabled(initialTask)}>
                       {endHour}
                     </Button>
                   </DropdownMenuTrigger>
@@ -249,7 +273,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 <span className="self-center">:</span>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-14 justify-between">
+                    <Button
+                      variant="outline"
+                      className="w-14 justify-between"
+                      disabled={isFieldDisabled(initialTask)}>
                       {endMinute}
                     </Button>
                   </DropdownMenuTrigger>
@@ -273,7 +300,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
               <Label className="block text-sm font-medium">Priority</Label>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-between"
+                    disabled={isFieldDisabled(initialTask)}>
                     {priority === 'LOW'
                       ? 'Low'
                       : priority === 'HIGH'
@@ -299,7 +329,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
               <Label className="block text-sm font-medium">Goal</Label>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-between"
+                    disabled={isFieldDisabled(initialTask)}>
                     {goals.find((g) => g.id === selectedGoalId)?.name ||
                       'No goal'}
                   </Button>
@@ -325,7 +358,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
             <Label className="block text-sm font-medium">Color</Label>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full justify-between">
+                <Button
+                  variant="outline"
+                  className="w-full justify-between"
+                  disabled={isFieldDisabled(initialTask)}>
                   <span className="flex items-center gap-2">
                     <span
                       className="inline-block w-4 h-4 rounded-full"
@@ -436,17 +472,32 @@ export const TaskModal: React.FC<TaskModalProps> = ({
           </div>
 
           <DialogFooter>
-            <Button type="submit">
-              {initialTask?.id ? 'Save Changes' : 'Create Task'}
-            </Button>
-            {initialTask?.id && (
-              <Button
-                className="absolute left-6 bottom-6"
-                type="button"
-                variant="destructive"
-                onClick={() => onDelete?.(initialTask)}>
-                Delete task
+            {!initialTask?.completed && (
+              <Button type="submit">
+                {initialTask?.id ? 'Save Changes' : 'Create Task'}
               </Button>
+            )}
+            {initialTask?.id && (
+              <div>
+                <Button
+                  className="absolute left-6 bottom-6"
+                  type="button"
+                  variant="destructive"
+                  onClick={() => onDelete?.(initialTask)}>
+                  Delete task
+                </Button>
+
+                {!initialTask.completed && (
+                  <Button
+                    className="absolute left-36 bottom-6"
+                    type="button"
+                    onClick={() =>
+                      onSave?.({ ...initialTask, completed: true })
+                    }>
+                    Complete
+                  </Button>
+                )}
+              </div>
             )}
             <DialogClose asChild>
               <Button type="button" variant="ghost">

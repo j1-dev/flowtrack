@@ -2,6 +2,7 @@ import React from 'react';
 // import { isSameHour, differenceInMinutes } from 'date-fns';
 import { useCalendar } from './Calendar';
 import { Task } from '@/lib/types';
+import { CircleCheck } from 'lucide-react';
 
 type EventGroupProps = {
   events: Task[];
@@ -71,13 +72,18 @@ const EventGroup = ({
           const startPosition = minutesFromDayStart / (24 * 60);
           const height = minutesDuration / (24 * 60);
 
-          // Only show resize handle if this is the true end of the event (not clipped by day)
-          const showResizeHandle = visibleEnd.getTime() === event.end.getTime();
+          // Only show resize handle if this is the true end of the event (not clipped by day) and the task is not completed
+          const showResizeHandle =
+            visibleEnd.getTime() === event.end.getTime() && !event.completed;
 
           return (
             <div
-              draggable
+              draggable={!event.completed}
               onDragStart={(e) => {
+                if (event.completed) {
+                  e.preventDefault();
+                  return;
+                }
                 e.dataTransfer.setData('event-id', event.id);
                 e.dataTransfer.effectAllowed = 'move';
               }}
@@ -86,17 +92,24 @@ const EventGroup = ({
                 if (onEventClick) onEventClick(event);
               }}
               key={event.id + '-' + dayStart.toISOString()}
-              className="absolute font-bold border-l-4 rounded p-2 text-xs cursor-move group w-full"
+              className={`absolute font-bold border-l-4 rounded p-2 text-xs w-full ${
+                event.completed ? 'opacity-50' : 'cursor-move group'
+              }`}
               style={{
                 top: `${startPosition * 100}%`,
                 height: `${height * 100}%`,
-                backgroundColor: `${event.color}4D`,
-                color: `${event.color}`,
-                borderLeftColor: `${event.color}`,
+                backgroundColor: event.completed
+                  ? '#94a3b8'
+                  : `${event.color || '#6366f1'}4D`,
+                color: event.completed ? '#000000' : event.color || '#6366f1',
+                borderLeftColor: event.completed
+                  ? '#64748b'
+                  : event.color || '#6366f1',
                 userSelect: 'none',
+                textDecoration: event.completed ? 'line-through' : 'none',
               }}>
               {event.title}
-              {/* Resize handle only if this is the true end of the event */}
+              <CircleCheck className='absolute bottom-2 right-2 text-black'/>
               {showResizeHandle && (
                 <div
                   className="z-10 absolute left-0 right-0 bottom-0 h-1 cursor-ns-resize group-hover:bg-black/20"
