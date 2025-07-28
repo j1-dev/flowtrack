@@ -16,11 +16,13 @@ export async function PUT(
   if (!(typeof verify !== 'object' || 'userId' in verify)) {
     return verify;
   }
-  const { name, frequency, streak } = await request.json();
+  const { name, frequency, streak, goalId, completedAt } = await request.json();
   const updated = await updateHabitById(id, {
     name,
     frequency,
     streak,
+    goalId,
+    completedAt,
   });
   return NextResponse.json(updated);
 }

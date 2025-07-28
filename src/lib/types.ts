@@ -41,6 +41,7 @@ export type Habit = {
   goal?: Goal | null;
   createdAt: Date;
   updatedAt: Date;
+  completedAt: Date;
 };
 
 export type Goal = {

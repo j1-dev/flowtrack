@@ -90,7 +90,12 @@ import type { Frequency } from '@prisma/client';
 
 export async function createHabit(
   userId: string,
-  data: { name: string; frequency: Frequency; streak?: number }
+  data: {
+    name: string;
+    frequency: Frequency;
+    streak?: number;
+    goalId?: string | null;
+  }
 ) {
   return prisma.habit.create({
     data: { ...data, userId },
@@ -99,7 +104,13 @@ export async function createHabit(
 
 export async function updateHabitById(
   id: string,
-  data: { name?: string; frequency?: Frequency; streak?: number }
+  data: {
+    name?: string;
+    frequency?: Frequency;
+    streak?: number;
+    goalId?: string | null;
+    completedAt?: Date;
+  }
 ) {
   return prisma.habit.update({
     where: { id },
