@@ -6,8 +6,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
-  DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,54 +57,61 @@ export const GoalModal: React.FC<GoalModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
             {initialGoal?.id ? 'Edit Goal' : 'Create Goal'}
           </DialogTitle>
+          <DialogDescription>
+            {initialGoal?.id
+              ? 'Make changes to your goal here.'
+              : 'Create a new goal to organize your habits and tasks.'}
+          </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label className="block text-sm font-medium">Name</Label>
-            <Input
-              type="text"
-              placeholder="Goal name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full p-2 rounded bg-background border"
-              required
-            />
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Enter goal name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full"
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="What do you want to achieve with this goal?"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="resize-none"
+                rows={3}
+                maxLength={500}
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label className="block text-sm font-medium">Description</Label>
-            <Textarea
-              placeholder="Describe the goal..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-2 rounded bg-background border resize-none"
-              rows={3}
-              maxLength={500}
-            />
-          </div>
-
-          <DialogFooter>
-            <Button type="submit">
-              {initialGoal?.id ? 'Save Changes' : 'Create Goal'}
-            </Button>
+          <DialogFooter className="gap-2 sm:gap-0">
             {initialGoal?.id && (
               <Button
-                className="absolute left-6 bottom-6"
                 type="button"
                 variant="destructive"
                 onClick={() => onDelete?.(initialGoal)}>
-                Delete goal
+                Delete Goal
               </Button>
             )}
-            <DialogClose asChild>
-              <Button type="button" variant="ghost">
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-            </DialogClose>
+              <Button type="submit">
+                {initialGoal?.id ? 'Save Changes' : 'Create Goal'}
+              </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -6,18 +6,19 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
-  DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Goal, Habit } from '@/lib/types';
 
 interface HabitModalProps {
@@ -82,98 +83,98 @@ export const HabitModal: React.FC<HabitModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
             {initialHabit?.id ? 'Edit Habit' : 'Create Habit'}
           </DialogTitle>
+          <DialogDescription>
+            {initialHabit?.id
+              ? 'Make changes to your habit here.'
+              : 'Create a new habit to track your progress.'}
+          </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Habit Details Section */}
-          <div className="space-y-2">
-            <Label className="block text-sm font-medium">Name</Label>
-            <Input
-              type="text"
-              placeholder="Habit name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full p-2 rounded bg-background border"
-              required
-            />
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Enter habit name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full"
+                required
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="frequency">Frequency</Label>
+              <Select
+                value={frequency}
+                onValueChange={(value) =>
+                  setFrequency(value as 'DAILY' | 'WEEKLY' | 'MONTHLY')
+                }>
+                <SelectTrigger>
+                  <SelectValue>
+                    {frequency === 'DAILY'
+                      ? 'Daily'
+                      : frequency === 'WEEKLY'
+                      ? 'Weekly'
+                      : 'Monthly'}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DAILY">Daily</SelectItem>
+                  <SelectItem value="WEEKLY">Weekly</SelectItem>
+                  <SelectItem value="MONTHLY">Monthly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="goal">Goal (Optional)</Label>
+              <Select
+                value={selectedGoalId || 'none'}
+                onValueChange={(value) =>
+                  setSelectedGoalId(value === 'none' ? null : value)
+                }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a goal">
+                    {goals.find((g) => g.id === selectedGoalId)?.name ||
+                      'No goal'}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No goal</SelectItem>
+                  {goals.map((goal) => (
+                    <SelectItem key={goal.id} value={goal.id}>
+                      {goal.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          {/* Frequency Section */}
-          <div className="space-y-2">
-            <Label className="block text-sm font-medium">Frequency</Label>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full justify-between">
-                  {frequency === 'DAILY'
-                    ? 'Daily'
-                    : frequency === 'WEEKLY'
-                    ? 'Weekly'
-                    : 'Monthly'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-full min-w-[8rem]">
-                <DropdownMenuItem onSelect={() => setFrequency('DAILY')}>
-                  Daily
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setFrequency('WEEKLY')}>
-                  Weekly
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setFrequency('MONTHLY')}>
-                  Monthly
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Goal Section */}
-          <div className="space-y-2">
-            <Label className="block text-sm font-medium">Goal</Label>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full justify-between">
-                  {goals.find((g) => g.id === selectedGoalId)?.name ||
-                    'No goal'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-full min-w-[8rem]">
-                <DropdownMenuItem onSelect={() => setSelectedGoalId(null)}>
-                  No goal
-                </DropdownMenuItem>
-                {goals.map((goal) => (
-                  <DropdownMenuItem
-                    key={goal.id}
-                    onSelect={() => setSelectedGoalId(goal.id)}>
-                    {goal.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          <DialogFooter>
-            <Button type="submit">
-              {initialHabit?.id ? 'Save Changes' : 'Create Habit'}
-            </Button>
+          <DialogFooter className="gap-2 sm:gap-0">
             {initialHabit?.id && (
-              <div>
-                <Button
-                  className="absolute left-6 bottom-6"
-                  type="button"
-                  variant="destructive"
-                  onClick={() => onDelete?.(initialHabit)}>
-                  Delete Habit
-                </Button>
-              </div>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => onDelete?.(initialHabit)}>
+                Delete Habit
+              </Button>
             )}
-            <DialogClose asChild>
-              <Button type="button" variant="ghost">
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-            </DialogClose>
+              <Button type="submit">
+                {initialHabit?.id ? 'Save Changes' : 'Create Habit'}
+              </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>

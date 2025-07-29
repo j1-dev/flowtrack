@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -159,75 +160,123 @@ function HabitsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Habits</h1>
+    <div className="max-w-7xl mx-auto p-6">
+      <div className="flex justify-between items-center mb-8">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight">Habits</h1>
+          <p className="text-sm text-muted-foreground">
+            Track and maintain your daily, weekly, and monthly habits
+          </p>
+        </div>
         <Button
+          size="sm"
+          className="px-3"
           onClick={() => {
             setSelectedHabit(null);
             setIsModalOpen(true);
           }}>
-          Create New Habit
+          <Plus className="w-4 h-4 mr-2" />
+          New Habit
         </Button>
       </div>
-
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {habits.map((habit) => (
-          <Card key={habit.id}>
-            <CardHeader>
-              <CardTitle className="flex justify-between items-center">
-                <span>{habit.name}</span>
-                <span className="text-sm font-normal flex items-center gap-1">
-                  <span className="text-orange-500">🔥</span>
-                  <span>
-                    {habit.streak} day{habit.streak !== 1 ? 's' : ''}
+      {habits.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
+            <Plus className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">No habits yet</h3>
+          <p className="text-sm text-muted-foreground text-center max-w-sm mb-6">
+            Create your first habit to start building consistent routines and
+            tracking your progress.
+          </p>
+          <Button
+            size="sm"
+            onClick={() => {
+              setSelectedHabit(null);
+              setIsModalOpen(true);
+            }}>
+            Create your first habit
+          </Button>
+        </div>
+      ) : (
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {habits.map((habit) => (
+            <Card key={habit.id} className="group">
+              <CardHeader>
+                <CardTitle className="flex justify-between items-center">
+                  <span className="truncate mr-2">{habit.name}</span>
+                  <span className="text-sm font-normal flex items-center gap-1.5 shrink-0 bg-orange-500/10 text-orange-600 dark:text-orange-400 px-2.5 py-0.5 rounded-full">
+                    <span className="text-base">🔥</span>
+                    <span>
+                      {habit.streak} day{habit.streak !== 1 ? 's' : ''}
+                    </span>
                   </span>
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="inline-flex relative w-full">
-                <p className="text-sm text-muted-foreground absolute">
-                  Frequency: {habit.frequency.toLowerCase()}
-                </p>
-                {getTimeUntilAvailable(habit) && (
-                  <p className="text-sm text-muted-foreground/80 absolute right-0">
-                    {getTimeUntilAvailable(habit)}
-                  </p>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`h-2 w-2 rounded-full ${
+                        habit.frequency === 'DAILY'
+                          ? 'bg-green-500'
+                          : habit.frequency === 'WEEKLY'
+                          ? 'bg-blue-500'
+                          : 'bg-purple-500'
+                      }`}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {habit.frequency.toLowerCase()}
+                    </span>
+                  </div>
+                  {getTimeUntilAvailable(habit) && (
+                    <span className="text-sm text-muted-foreground/90">
+                      {getTimeUntilAvailable(habit)}
+                    </span>
+                  )}
+                </div>
+                {habit.goal && (
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-orange-500" />
+                    <span className="text-sm text-muted-foreground truncate">
+                      {habit.goal.name}
+                    </span>
+                  </div>
                 )}
-              </div>
-              {habit.goal && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  Goal: {habit.goal.name}
-                </p>
-              )}
-            </CardContent>
-            <CardFooter className="flex justify-between gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSelectedHabit(habit);
-                  setIsModalOpen(true);
-                }}>
-                Edit
-              </Button>
-              {shouldComplete(habit) ? (
+              </CardContent>
+              <CardFooter className="flex justify-between gap-2">
                 <Button
-                  variant="default"
-                  onClick={() => handleIncrementStreak(habit)}>
-                  Complete Today
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedHabit(habit);
+                    setIsModalOpen(true);
+                  }}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  Edit
                 </Button>
-              ) : (
-                <div className="flex flex-col items-end gap-1">
-                  <Button variant="secondary" disabled>
+                {shouldComplete(habit) ? (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => handleIncrementStreak(habit)}
+                    className="w-32">
+                    Complete
+                  </Button>
+                ) : (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled
+                    className="w-32">
                     Completed
                   </Button>
-                </div>
-              )}
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+                )}
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <HabitModal
         open={isModalOpen}

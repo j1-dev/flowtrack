@@ -3,38 +3,15 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { GoalModal } from '@/components/goal-modal';
 
-import type { Task, Habit } from '@/lib/types';
-
-type Goal = {
-  id: string;
-  name: string;
-  description?: string | null;
-  tasks: Task[];
-  habits: Habit[];
-  createdAt: string;
-  updatedAt: string;
-};
+import type { Goal } from '@/lib/types';
 
 export default function GoalsPage() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-  });
 
   useEffect(() => {
     fetchGoals();
@@ -47,31 +24,6 @@ export default function GoalsPage() {
       setGoals(data);
     } catch (error) {
       console.error('Error fetching goals:', error);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const url = editingGoal ? `/api/goals/${editingGoal.id}` : '/api/goals';
-      const method = editingGoal ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) throw new Error('Failed to save goal');
-
-      setIsOpen(false);
-      setEditingGoal(null);
-      setFormData({ name: '', description: '' });
-      fetchGoals();
-    } catch (error) {
-      console.error('Error saving goal:', error);
     }
   };
 
@@ -92,101 +44,135 @@ export default function GoalsPage() {
 
   const openEditDialog = (goal: Goal) => {
     setEditingGoal(goal);
-    setFormData({
-      name: goal.name,
-      description: goal.description || '',
-    });
     setIsOpen(true);
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <Button
-              onClick={() => {
-                setEditingGoal(null);
-                setFormData({ name: '', description: '' });
-              }}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Goal
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {editingGoal ? 'Edit Goal' : 'Create New Goal'}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Input
-                  placeholder="Goal name"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
+    <div className="max-w-7xl mx-auto p-6">
+      <div className="flex justify-between items-center mb-8">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight">Goals</h1>
+          <p className="text-sm text-muted-foreground">
+            Organize your habits and tasks with meaningful goals
+          </p>
+        </div>
+        <Button
+          size="sm"
+          className="px-3"
+          onClick={() => {
+            setEditingGoal(null);
+            setIsOpen(true);
+          }}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add Goal
+        </Button>
+
+        <GoalModal
+          open={isOpen}
+          onClose={() => setIsOpen(false)}
+          onSave={async (goal) => {
+            try {
+              const url = editingGoal
+                ? `/api/goals/${editingGoal.id}`
+                : '/api/goals';
+              const method = editingGoal ? 'PUT' : 'POST';
+
+              const response = await fetch(url, {
+                method,
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  name: goal.name,
+                  description: goal.description,
+                }),
+              });
+
+              if (!response.ok) throw new Error('Failed to save goal');
+              fetchGoals();
+            } catch (error) {
+              console.error('Error saving goal:', error);
+            }
+          }}
+          onDelete={
+            editingGoal
+              ? async (goal) => {
+                  try {
+                    const response = await fetch(`/api/goals/${goal.id}`, {
+                      method: 'DELETE',
+                    });
+
+                    if (!response.ok) throw new Error('Failed to delete goal');
+                    fetchGoals();
+                  } catch (error) {
+                    console.error('Error deleting goal:', error);
                   }
-                  required
-                />
-              </div>
-              <div>
-                <Textarea
-                  placeholder="Description (optional)"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  rows={3}
-                />
-              </div>
-              <DialogFooter>
-                <Button type="submit">
-                  {editingGoal ? 'Update' : 'Create'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+                }
+              : undefined
+          }
+          initialGoal={editingGoal}
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {goals.map((goal) => (
           <div
             key={goal.id}
-            className="p-4 rounded-lg border bg-card text-card-foreground shadow">
-            <div className="flex justify-between items-start mb-2">
-              <h3 className="font-semibold">{goal.name}</h3>
-              <div className="flex gap-2">
+            className="group p-6 rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md">
+            <div className="flex justify-between items-start mb-3">
+              <h3 className="font-semibold text-lg tracking-tight">
+                {goal.name}
+              </h3>
+              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={() => openEditDialog(goal)}
-                  className="text-muted-foreground hover:text-foreground">
+                  className="text-muted-foreground hover:text-foreground transition-colors">
                   <Pencil className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => handleDelete(goal.id)}
-                  className="text-muted-foreground hover:text-destructive">
+                  className="text-muted-foreground hover:text-destructive transition-colors">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
             {goal.description && (
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm text-muted-foreground mb-6 line-clamp-2">
                 {goal.description}
               </p>
             )}
-            <div className="text-sm text-muted-foreground">
-              <p>{goal.tasks.length} tasks</p>
-              <p>{goal.habits.length} habits</p>
+            <div className="flex gap-4 text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                <span>{goal.tasks.length} tasks</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="h-2 w-2 rounded-full bg-orange-500"></div>
+                <span>{goal.habits.length} habits</span>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
       {goals.length === 0 && (
-        <div className="text-center text-muted-foreground py-8">
-          No goals created yet. Click the &quot;Add Goal&quot; button to create
-          your first goal.
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
+            <Plus className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">No goals yet</h3>
+          <p className="text-sm text-muted-foreground text-center max-w-sm mb-6">
+            Create your first goal to start organizing your habits and tasks in
+            a meaningful way.
+          </p>
+          <Button
+            size="sm"
+            onClick={() => {
+              setEditingGoal(null);
+              setIsOpen(true);
+            }}>
+            Create your first goal
+          </Button>
         </div>
       )}
     </div>
