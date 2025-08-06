@@ -191,9 +191,9 @@ export default function ProtectedLayout({
         onDelete={handleDeleteTask}
         initialTask={editingTask}
       />
-      <div className="min-h-screen bg-background text-foreground flex flex-col lg:flex-row">
+      <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row">
         {/* Navbar - responsive positioning */}
-        <div className="lg:flex-shrink-0">
+        <div className="md:flex-shrink-0">
           <Navbar
             tasks={tasks}
             onUpcomingEventClick={handleUpcomingEventClick}
