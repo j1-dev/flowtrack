@@ -15,6 +15,7 @@ export type ContextType = {
   setEvents: (date: Task[]) => void;
   onChangeView?: (view: View) => void;
   onEventClick?: (event: Task) => void;
+  onUpcomingEventClick?: (event: Task) => void;
   enableHotkeys?: boolean;
   today: Date;
   onCreateAtTime?: (date: Date) => void;

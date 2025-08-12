@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,25 +12,12 @@ import {
 } from '@/components/ui/card';
 import { HabitModal } from '@/components/habit-modal';
 import { Habit } from '@/lib/types';
+import { useUserData } from '@/components/data-context';
 
 function HabitsPage() {
-  const [habits, setHabits] = useState<Habit[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
-
-  useEffect(() => {
-    fetchHabits();
-  }, []);
-
-  const fetchHabits = async () => {
-    try {
-      const response = await fetch('/api/habits');
-      const data = await response.json();
-      setHabits(data);
-    } catch (error) {
-      console.error('Error fetching habits:', error);
-    }
-  };
+  const { habits, refreshAll } = useUserData();
 
   const handleSave = async (habit: Habit) => {
     try {
@@ -42,7 +29,7 @@ function HabitsPage() {
         body: JSON.stringify(habit),
       });
       if (response.ok) {
-        fetchHabits();
+        refreshAll();
         setIsModalOpen(false);
       }
     } catch (error) {
@@ -56,7 +43,7 @@ function HabitsPage() {
         method: 'DELETE',
       });
       if (response.ok) {
-        fetchHabits();
+        refreshAll();
         setIsModalOpen(false);
       }
     } catch (error) {
@@ -76,7 +63,7 @@ function HabitsPage() {
         }),
       });
       if (response.ok) {
-        fetchHabits();
+        refreshAll();
       }
     } catch (error) {
       console.error('Error updating habit streak:', error);

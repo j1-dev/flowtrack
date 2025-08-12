@@ -4,16 +4,14 @@ import React from 'react';
 import { Habit } from '@/lib/types';
 import { Checkbox } from '@/components/ui/checkbox';
 import { isToday } from 'date-fns';
+import { useUserData } from '../data-context';
 
 interface TodayHabitsProps {
   habits: Habit[];
 }
 
 function TodayHabits({ habits }: TodayHabitsProps) {
-  const todayHabits = habits.filter((habit) => {
-    const lastCompleted = new Date(habit.completedAt);
-    return !isToday(lastCompleted) || habit.createdAt === habit.completedAt;
-  });
+  const { refreshAll } = useUserData();
 
   const handleHabitComplete = async (habitId: string, completed: boolean) => {
     if (completed) {
@@ -34,15 +32,16 @@ function TodayHabits({ habits }: TodayHabitsProps) {
           completedAt: new Date(),
         }),
       });
+      refreshAll();
     }
   };
 
   return (
     <div className="space-y-4">
-      {todayHabits.length === 0 ? (
+      {habits.length === 0 ? (
         <p className="text-muted-foreground">No habits to complete today</p>
       ) : (
-        todayHabits.map((habit) => (
+        habits.map((habit) => (
           <div key={habit.id} className="flex items-center space-x-4">
             <Checkbox
               id={habit.id}

@@ -7,25 +7,16 @@ import { Button } from '@/components/ui/button';
 import { GoalModal } from '@/components/goal-modal';
 
 import type { Goal } from '@/lib/types';
+import { useUserData } from '@/components/data-context';
 
 export default function GoalsPage() {
-  const [goals, setGoals] = useState<Goal[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const { goals, refreshAll } = useUserData();
 
   useEffect(() => {
-    fetchGoals();
-  }, []);
-
-  const fetchGoals = async () => {
-    try {
-      const response = await fetch('/api/goals');
-      const data = await response.json();
-      setGoals(data);
-    } catch (error) {
-      console.error('Error fetching goals:', error);
-    }
-  };
+    refreshAll();
+  }, [refreshAll]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this goal?')) return;
@@ -36,7 +27,7 @@ export default function GoalsPage() {
       });
 
       if (!response.ok) throw new Error('Failed to delete goal');
-      fetchGoals();
+      refreshAll();
     } catch (error) {
       console.error('Error deleting goal:', error);
     }
@@ -89,7 +80,7 @@ export default function GoalsPage() {
               });
 
               if (!response.ok) throw new Error('Failed to save goal');
-              fetchGoals();
+              refreshAll();
             } catch (error) {
               console.error('Error saving goal:', error);
             }
@@ -103,7 +94,7 @@ export default function GoalsPage() {
                     });
 
                     if (!response.ok) throw new Error('Failed to delete goal');
-                    fetchGoals();
+                    refreshAll();
                   } catch (error) {
                     console.error('Error deleting goal:', error);
                   }

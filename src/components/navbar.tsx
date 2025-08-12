@@ -4,23 +4,14 @@ import { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Home, Menu, CalendarDays, CheckSquare, X, Flag } from 'lucide-react';
-import { Task } from '@/lib/types';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
 import { useCalendar } from '@/components/ui/full-calendar/Calendar';
 import { useRouter } from 'next/navigation';
 
-
-interface NavbarProps {
-  tasks: Task[];
-  onUpcomingEventClick: (task: Task) => void;
-}
-
-export const Navbar: React.FC<NavbarProps> = ({
-  tasks = [],
-  onUpcomingEventClick,
-}) => {
+export const Navbar: React.FC = () => {
+  const { events, onUpcomingEventClick } = useCalendar();
   const router = useRouter();
   const { setView, setDate } = useCalendar();
   const [open, setOpen] = useState(false);
@@ -28,7 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [clickedDate, setClickedDate] = useState<Date>(new Date());
 
   // Filter tasks that are coming up (next 7 days)
-  const upcomingTasks = tasks
+  const upcomingTasks = events
     .filter((task) => {
       const taskDate = new Date(task.start);
       const today = new Date();
@@ -176,7 +167,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <div
                     key={task.id}
                     className="p-2 rounded-lg bg-accent/50 hover:bg-accent cursor-pointer"
-                    onClick={() => onUpcomingEventClick(task)}
+                    onClick={() => onUpcomingEventClick?.(task)}
                     style={{
                       borderLeft: `4px solid ${task.color || '#888'}`,
                     }}>

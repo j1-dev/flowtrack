@@ -4,25 +4,33 @@ import React from 'react';
 import { Task } from '@/lib/types';
 import { format } from 'date-fns';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useUserData } from '../data-context';
 
 interface UpcomingTasksProps {
   tasks: Task[];
 }
 
 function UpcomingTasks({ tasks }: UpcomingTasksProps) {
+  const { refreshAll } = useUserData();
   const upcomingTasks = tasks
-    .filter((task) => !task.completed && new Date(task.end) >= new Date())
+    .filter((task) => new Date(task.end) >= new Date())
     .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
     .slice(0, 5);
 
   const handleTaskComplete = async (taskId: string, completed: boolean) => {
+    const selectedTask = tasks.find((task) => task.id === taskId);
     await fetch(`/api/tasks/${taskId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ id: taskId, completed }),
+      body: JSON.stringify({
+        ...selectedTask,
+        id: taskId,
+        completed: completed,
+      }),
     });
+    refreshAll();
   };
 
   return (
