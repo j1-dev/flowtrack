@@ -12,8 +12,6 @@ import {
 import { subDays, format, startOfDay } from 'date-fns';
 import { Card } from '../ui/card';
 
-// Activity Chart Component
-// Activity Chart Component
 interface ActivityChartProps {
   tasks: Task[];
   habits: Habit[];

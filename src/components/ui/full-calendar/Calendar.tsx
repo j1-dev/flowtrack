@@ -31,7 +31,7 @@ const Calendar = ({
   view: _defaultMode = 'day',
   onChangeView,
 }: CalendarProps) => {
-  const { tasks } = useUserData();
+  const { tasks, refreshAll } = useUserData();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const currentYear = defaultDate.getFullYear();
@@ -137,6 +137,7 @@ const Calendar = ({
     }
     setEditingTask(null);
     setModalOpen(false);
+    refreshAll();
   };
 
   const handleDeleteTask = async (task: Task) => {
@@ -145,6 +146,7 @@ const Calendar = ({
     setModalOpen(false);
     console.log('DELETE');
     await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' });
+    refreshAll();
   };
 
   const handleUpcomingEventClick = (task: Task): void => {
