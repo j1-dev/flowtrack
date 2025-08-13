@@ -2,7 +2,7 @@
 
 import { Navbar } from '@/components/navbar';
 import { ThemeSwitcher } from '@/components/theme-switcher';
-import { AuthButtons } from '@/components/auth-buttons';
+import { AuthButtons } from '@/components/auth/auth-buttons';
 import React from 'react';
 import { usePathname } from 'next/navigation';
 import { Calendar } from '@/components/ui/full-calendar/Calendar';

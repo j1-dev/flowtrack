@@ -1,4 +1,4 @@
-import { AuthProvider } from '@/components/auth-provider';
+import { AuthProvider } from '@/components/auth/auth-provider';
 import { ThemeProvider } from 'next-themes';
 import localFont from 'next/font/local';
 import './globals.css';

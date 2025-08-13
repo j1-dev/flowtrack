@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { HabitModal } from '@/components/habit-modal';
+import { HabitModal } from '@/components/modals/habit-modal';
 import { Habit } from '@/lib/types';
 import { useUserData } from '@/components/data-context';
 

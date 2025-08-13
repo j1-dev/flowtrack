@@ -4,7 +4,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { GoalModal } from '@/components/goal-modal';
+import { GoalModal } from '@/components/modals/goal-modal';
 
 import type { Goal } from '@/lib/types';
 import { useUserData } from '@/components/data-context';

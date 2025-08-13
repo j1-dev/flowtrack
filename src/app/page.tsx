@@ -14,7 +14,7 @@ import {
   Users,
   Star,
 } from 'lucide-react';
-import { AuthButtons } from '@/components/auth-buttons';
+import { AuthButtons } from '@/components/auth/auth-buttons';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import MouseMoveEffect from '@/components/mouse-move-effect';
@@ -138,9 +138,7 @@ const HomePage: FC = () => {
           </div>
           <div className="flex items-center gap-2 text-foreground/80 text-sm">
             <Users className="w-5 h-5" />
-            Trusted by <span className="font-bold text-primary">
-              3
-            </span>{' '}
+            Trusted by <span className="font-bold text-primary">3</span>{' '}
             professionals worldwide
           </div>
         </div>
