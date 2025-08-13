@@ -14,6 +14,7 @@ import {
   CalendarWeekView,
   CalendarYearView,
 } from '@/components/ui/full-calendar/index';
+import Loading from '@/components/loading';
 
 const CalendarPage: FC = () => {
   const { status } = useSession();
@@ -40,14 +41,7 @@ const CalendarPage: FC = () => {
   }, [status, router]);
 
   if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-2">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading Calendar...</p>
-        </div>
-      </div>
-    );
+    return <Loading text="Loading Calendar..." />;
   }
 
   return (

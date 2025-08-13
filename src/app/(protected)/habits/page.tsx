@@ -3,21 +3,16 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { HabitModal } from '@/components/modals/habit-modal';
 import { Habit } from '@/lib/types';
 import { useUserData } from '@/components/data-context';
+import { HabitCard } from '@/components/cards/habit-card';
+import Loading from '@/components/loading';
 
 function HabitsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
-  const { habits, refreshAll } = useUserData();
+  const { habits, refreshAll, loading } = useUserData();
 
   const handleSave = async (habit: Habit) => {
     try {
@@ -70,81 +65,11 @@ function HabitsPage() {
     }
   };
 
-  const getTimeUntilAvailable = (habit: Habit): string | null => {
-    if (habit.completedAt === habit.createdAt) {
-      return null; // New habit, available immediately
-    }
-
-    const now = new Date();
-    const updatedAt = new Date(habit.completedAt);
-    let nextAvailable: Date;
-
-    switch (habit.frequency) {
-      case 'DAILY': {
-        nextAvailable = new Date(updatedAt);
-        nextAvailable.setDate(updatedAt.getDate() + 1);
-        nextAvailable.setHours(updatedAt.getHours());
-        nextAvailable.setMinutes(updatedAt.getMinutes());
-        break;
-      }
-      case 'WEEKLY': {
-        nextAvailable = new Date(updatedAt);
-        nextAvailable.setDate(updatedAt.getDate() + 7);
-        break;
-      }
-      case 'MONTHLY': {
-        nextAvailable = new Date(updatedAt);
-        nextAvailable.setMonth(updatedAt.getMonth() + 1);
-        break;
-      }
-      default:
-        return null;
-    }
-
-    if (now >= nextAvailable) {
-      return null; // Already available
-    }
-
-    const diff = nextAvailable.getTime() - now.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-    if (hours > 24) {
-      const days = Math.floor(hours / 24);
-      return `${days} day${days !== 1 ? 's' : ''} remaining`;
-    }
-    if (hours > 0) {
-      return `${hours}h ${minutes}m remaining`;
-    }
-    return `${minutes}m remaining`;
-  };
-
-  const shouldComplete = (habit: Habit) => {
-    // If the habit has never been updated (new habit), it should be completable
-    if (habit.completedAt === habit.createdAt) {
-      return true;
-    }
-
-    const today = new Date();
-    const updatedAt = new Date(habit.completedAt);
-
-    switch (habit.frequency) {
-      case 'DAILY':
-        return today.toDateString() !== updatedAt.toDateString();
-      case 'WEEKLY':
-        const weekDiff = Math.floor(
-          (today.getTime() - updatedAt.getTime()) / (1000 * 60 * 60 * 24 * 7)
-        );
-        return weekDiff >= 1;
-      case 'MONTHLY':
-        return (
-          today.getMonth() !== updatedAt.getMonth() ||
-          today.getFullYear() !== updatedAt.getFullYear()
-        );
-      default:
-        return false;
-    }
-  };
+  if (loading) {
+    return (
+      <Loading text="Loading Habits..." />
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -188,79 +113,13 @@ function HabitsPage() {
       ) : (
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {habits.map((habit) => (
-            <Card key={habit.id} className="group">
-              <CardHeader>
-                <CardTitle className="flex justify-between items-center">
-                  <span className="truncate mr-2">{habit.name}</span>
-                  <span className="text-sm font-normal flex items-center gap-1.5 shrink-0 bg-orange-500/10 text-orange-600 dark:text-orange-400 px-2.5 py-0.5 rounded-full">
-                    <span className="text-base">🔥</span>
-                    <span>
-                      {habit.streak} day{habit.streak !== 1 ? 's' : ''}
-                    </span>
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`h-2 w-2 rounded-full ${
-                        habit.frequency === 'DAILY'
-                          ? 'bg-green-500'
-                          : habit.frequency === 'WEEKLY'
-                          ? 'bg-blue-500'
-                          : 'bg-purple-500'
-                      }`}
-                    />
-                    <span className="text-sm text-muted-foreground">
-                      {habit.frequency.toLowerCase()}
-                    </span>
-                  </div>
-                  {getTimeUntilAvailable(habit) && (
-                    <span className="text-sm text-muted-foreground/90">
-                      {getTimeUntilAvailable(habit)}
-                    </span>
-                  )}
-                </div>
-                {habit.goal && (
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-orange-500" />
-                    <span className="text-sm text-muted-foreground truncate">
-                      {habit.goal.name}
-                    </span>
-                  </div>
-                )}
-              </CardContent>
-              <CardFooter className="flex justify-between gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedHabit(habit);
-                    setIsModalOpen(true);
-                  }}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  Edit
-                </Button>
-                {shouldComplete(habit) ? (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => handleIncrementStreak(habit)}
-                    className="w-32">
-                    Complete
-                  </Button>
-                ) : (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    disabled
-                    className="w-32">
-                    Completed
-                  </Button>
-                )}
-              </CardFooter>
-            </Card>
+            <HabitCard
+              habit={habit}
+              key={habit.id}
+              setIsModalOpen={setIsModalOpen}
+              setSelectedHabit={setSelectedHabit}
+              handleIncrementStreak={handleIncrementStreak}
+            />
           ))}
         </div>
       )}

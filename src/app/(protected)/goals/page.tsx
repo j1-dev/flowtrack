@@ -1,35 +1,48 @@
 'use client';
 
-import React from 'react';
-import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GoalModal } from '@/components/modals/goal-modal';
-
-import type { Goal } from '@/lib/types';
+import { Goal } from '@/lib/types';
 import { useUserData } from '@/components/data-context';
+import { GoalCard } from '@/components/cards/goal-card';
+import Loading from '@/components/loading';
 
 export default function GoalsPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
-  const { goals, refreshAll } = useUserData();
-
-  useEffect(() => {
-    refreshAll();
-  }, [refreshAll]);
+  const { goals, refreshAll, loading } = useUserData();
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this goal?')) return;
-
     try {
-      const response = await fetch(`/api/goals/${id}`, {
-        method: 'DELETE',
-      });
-
+      const response = await fetch(`/api/goals/${id}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Failed to delete goal');
       refreshAll();
     } catch (error) {
       console.error('Error deleting goal:', error);
+    }
+  };
+
+  const handleSave = async (goal: Goal) => {
+    try {
+      const url = editingGoal ? `/api/goals/${editingGoal.id}` : '/api/goals';
+      const method = editingGoal ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: goal.name,
+          description: goal.description,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to save goal');
+      refreshAll();
+    } catch (error) {
+      console.error('Error saving goal:', error);
     }
   };
 
@@ -38,8 +51,13 @@ export default function GoalsPage() {
     setIsOpen(true);
   };
 
+  if (loading) {
+    return <Loading text="Loading Goals..." />;
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-6">
+      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight">Goals</h1>
@@ -57,96 +75,10 @@ export default function GoalsPage() {
           <Plus className="w-4 h-4 mr-2" />
           Add Goal
         </Button>
-
-        <GoalModal
-          open={isOpen}
-          onClose={() => setIsOpen(false)}
-          onSave={async (goal) => {
-            try {
-              const url = editingGoal
-                ? `/api/goals/${editingGoal.id}`
-                : '/api/goals';
-              const method = editingGoal ? 'PUT' : 'POST';
-
-              const response = await fetch(url, {
-                method,
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  name: goal.name,
-                  description: goal.description,
-                }),
-              });
-
-              if (!response.ok) throw new Error('Failed to save goal');
-              refreshAll();
-            } catch (error) {
-              console.error('Error saving goal:', error);
-            }
-          }}
-          onDelete={
-            editingGoal
-              ? async (goal) => {
-                  try {
-                    const response = await fetch(`/api/goals/${goal.id}`, {
-                      method: 'DELETE',
-                    });
-
-                    if (!response.ok) throw new Error('Failed to delete goal');
-                    refreshAll();
-                  } catch (error) {
-                    console.error('Error deleting goal:', error);
-                  }
-                }
-              : undefined
-          }
-          initialGoal={editingGoal}
-        />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {goals.map((goal) => (
-          <div
-            key={goal.id}
-            className="group p-6 rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="font-semibold text-lg tracking-tight">
-                {goal.name}
-              </h3>
-              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={() => openEditDialog(goal)}
-                  className="text-muted-foreground hover:text-foreground transition-colors">
-                  <Pencil className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => handleDelete(goal.id)}
-                  className="text-muted-foreground hover:text-destructive transition-colors">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-            {goal.description && (
-              <p className="text-sm text-muted-foreground mb-6 line-clamp-2">
-                {goal.description}
-              </p>
-            )}
-            <div className="flex gap-4 text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-                <span>{goal.tasks.length} tasks</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <div className="h-2 w-2 rounded-full bg-orange-500"></div>
-                <span>{goal.habits.length} habits</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {goals.length === 0 && (
+      {/* Goals grid */}
+      {goals.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 px-4">
           <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
             <Plus className="w-6 h-6 text-muted-foreground" />
@@ -165,7 +97,29 @@ export default function GoalsPage() {
             Create your first goal
           </Button>
         </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {goals.map((goal) => (
+            <GoalCard
+              key={goal.id}
+              goal={goal}
+              onEdit={openEditDialog}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
       )}
+
+      {/* Modal */}
+      <GoalModal
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        onSave={handleSave}
+        onDelete={
+          editingGoal ? async (goal) => handleDelete(goal.id) : undefined
+        }
+        initialGoal={editingGoal}
+      />
     </div>
   );
 }
