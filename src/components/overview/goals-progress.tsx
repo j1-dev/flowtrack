@@ -1,20 +1,14 @@
-'use client';
-
-import React from 'react';
 import { Goal } from '@/lib/types';
-import { Progress } from '@/components/ui/progress';
+import { Card } from '../ui/card';
+import { Progress } from '../ui/progress';
 
+// Goals Progress Component
 interface GoalsProgressProps {
-  goals: Array<
-    Goal & {
-      tasks: { completed: boolean }[];
-      habits: { streak: number }[];
-    }
-  >;
+  goals: Goal[];
 }
 
-function GoalsProgress({ goals }: GoalsProgressProps) {
-  const calculateProgress = (goal: GoalsProgressProps['goals'][0]) => {
+export function GoalsProgress({ goals }: GoalsProgressProps) {
+  const calculateProgress = (goal: Goal) => {
     const totalTasks = goal.tasks.length;
     const completedTasks = goal.tasks.filter((task) => task.completed).length;
     const hasHabits = goal.habits.length > 0;
@@ -35,25 +29,31 @@ function GoalsProgress({ goals }: GoalsProgressProps) {
   };
 
   return (
-    <div className="space-y-6">
-      {goals.length === 0 ? (
-        <p className="text-muted-foreground">No goals created yet</p>
-      ) : (
-        goals.map((goal) => (
-          <div key={goal.id} className="space-y-2">
-            <div className="flex justify-between items-center">
-              <p className="font-medium">{goal.name}</p>
-              <span className="text-sm text-muted-foreground">
-                {Math.round(calculateProgress(goal))}%
-              </span>
-            </div>
-            <Progress value={calculateProgress(goal)} className="h-2" />
-            <p className="text-sm text-muted-foreground">{goal.description}</p>
-          </div>
-        ))
-      )}
-    </div>
+    <Card className="p-6">
+      <h2 className="text-xl font-semibold mb-4">Goals Progress</h2>
+      <div className="space-y-4">
+        {goals.length === 0 ? (
+          <p className="text-muted-foreground">No goals created yet</p>
+        ) : (
+          goals.map((goal) => {
+            const progress = calculateProgress(goal);
+            return (
+              <div key={goal.id} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <p className="font-medium">{goal.name}</p>
+                  <span className="text-sm text-muted-foreground">
+                    {Math.round(progress)}%
+                  </span>
+                </div>
+                <Progress value={progress} className="h-2" />
+                <p className="text-sm text-muted-foreground">
+                  {goal.description}
+                </p>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </Card>
   );
 }
-
-export default GoalsProgress;
