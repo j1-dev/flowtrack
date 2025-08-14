@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { addDays, setHours, startOfWeek, format, isToday } from 'date-fns';
+import { addDays, setHours, startOfWeek, format, isToday, Day } from 'date-fns';
 import { useCalendar } from './Calendar';
 import EventGroup from './EventGroup';
 import TimeTable from './TimeTable';
@@ -10,7 +10,8 @@ const CalendarWeekView = () => {
     useCalendar();
 
   const weekDates = useMemo(() => {
-    const start = startOfWeek(date, { weekStartsOn: 0 });
+    console.log(date.getDay());
+    const start = startOfWeek(date, { weekStartsOn: date.getDay() as Day });
     const weekDates = [];
     for (let i = 0; i < 7; i++) {
       const day = addDays(start, i);
@@ -23,7 +24,10 @@ const CalendarWeekView = () => {
   const headerDays = useMemo(() => {
     const daysOfWeek = [];
     for (let i = 0; i < 7; i++) {
-      const result = addDays(startOfWeek(date, { weekStartsOn: 0 }), i);
+      const result = addDays(
+        startOfWeek(date, { weekStartsOn: date.getDay() as Day }),
+        i
+      );
       daysOfWeek.push(result);
     }
     return daysOfWeek;
@@ -59,7 +63,8 @@ const CalendarWeekView = () => {
             key={date.toString()}
             className={cn(
               'text-center flex-1 gap-1 pb-2 text-sm text-muted-foreground flex items-center justify-center',
-              [0, 6].includes(i) && 'text-muted-foreground/50'
+              [6 - new Date().getDay(), 7 - new Date().getDay()].includes(i) &&
+                'text-muted-foreground/50'
             )}>
             {format(date, 'E', { locale })}
             <span
@@ -84,7 +89,9 @@ const CalendarWeekView = () => {
               <div
                 className={cn(
                   'h-full text-sm text-muted-foreground border-l first:border-l-0 relative cursor-pointer',
-                  [0, 6].includes(i) && 'bg-muted/50'
+                  [6 - new Date().getDay(), 7 - new Date().getDay()].includes(
+                    i
+                  ) && 'bg-muted/50'
                 )}
                 key={hours[0].toString()}
                 ref={(el) => {
