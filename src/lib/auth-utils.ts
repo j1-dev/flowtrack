@@ -4,6 +4,7 @@ import {
   getTaskById,
   getHabitById,
   getGoalById,
+  getNoteById,
 } from './service';
 import { NextResponse } from 'next/server';
 
@@ -20,7 +21,7 @@ export async function requireSession() {
 }
 
 export async function verifyOwnership(
-  model: 'task' | 'habit' | 'goal',
+  model: 'task' | 'habit' | 'goal' | 'note',
   id: string,
   userId: string
 ) {
@@ -34,6 +35,9 @@ export async function verifyOwnership(
       break;
     case 'goal':
       resource = await getGoalById(id);
+      break;
+    case 'note':
+      resource = await getNoteById(id);
       break;
   }
 

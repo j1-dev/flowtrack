@@ -7,13 +7,14 @@ import React, {
   useState,
   useCallback,
 } from 'react';
-import type { User, Task, Habit, Goal } from '@/lib/types';
+import type { User, Task, Habit, Goal, Note } from '@/lib/types';
 
 type DataContextType = {
   user: User | null;
   tasks: Task[];
   habits: Habit[];
   goals: Goal[];
+  notes: Note[];
   loading: boolean;
   error: string | null;
   refreshAll: () => Promise<void>;
@@ -24,6 +25,7 @@ const DataContext = createContext<DataContextType>({
   tasks: [],
   habits: [],
   goals: [],
+  notes: [],
   loading: true,
   error: null,
   refreshAll: async () => {},
@@ -34,6 +36,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [habits, setHabits] = useState<Habit[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,7 +50,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       });
       if (!res.ok) throw new Error('Failed to fetch user data');
 
-      const { user, tasks, habits, goals } = await res.json();
+      const { user, tasks, habits, goals, notes } = await res.json();
 
       setUser(user);
       setTasks(
@@ -59,6 +62,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       );
       setHabits(habits);
       setGoals(goals);
+      setNotes(notes);
     } catch (err) {
       console.error(err);
       setError('Failed to load user data');
@@ -78,6 +82,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         tasks,
         habits,
         goals,
+        notes,
         loading,
         error,
         refreshAll: fetchAll,

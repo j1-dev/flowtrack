@@ -204,3 +204,53 @@ export async function detachHabitFromGoal(habitId: string) {
     data: { goalId: null },
   });
 }
+
+/** ===========================
+ *            NOTES
+ *  =========================== */
+
+export async function getNotesByUserId(userId: string) {
+  return prisma.note.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+  });
+}
+
+export async function getNoteById(id: string) {
+  return prisma.note.findUnique({ where: { id } });
+}
+
+export async function createNote(
+  userId: string,
+  data: {
+    title: string;
+    content: string;
+    taskId?: string | null;
+    habitId?: string | null;
+    goalId?: string | null;
+  }
+) {
+  return prisma.note.create({
+    data: { ...data, userId },
+  });
+}
+
+export async function updateNoteById(
+  id: string,
+  data: {
+    title?: string;
+    content?: string;
+    taskId?: string | null;
+    habitId?: string | null;
+    goalId?: string | null;
+  }
+) {
+  return prisma.note.update({
+    where: { id },
+    data,
+  });
+}
+
+export async function deleteNoteById(id: string) {
+  return prisma.note.delete({ where: { id } });
+}

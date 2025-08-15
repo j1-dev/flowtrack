@@ -1,14 +1,45 @@
 'use client';
 
-import { useState } from 'react';
+import { ForwardRefExoticComponent, RefAttributes, useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
-import { Home, Menu, CalendarDays, CheckSquare, X, Flag } from 'lucide-react';
+import {
+  Home,
+  Menu,
+  CalendarDays,
+  CheckSquare,
+  X,
+  Flag,
+  NotebookPen,
+  LucideProps,
+} from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
 import { useCalendar } from '@/components/ui/full-calendar/Calendar';
 import { useRouter } from 'next/navigation';
+
+export const NavLink: React.FC<{
+  href: string;
+  icon: ForwardRefExoticComponent<
+    Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
+  >;
+  children: React.ReactNode;
+  collapsed: boolean;
+}> = ({ href, icon: Icon, children, collapsed }) => {
+  return (
+    <Link
+      href={href}
+      className={`flex items-center space-x-3 ${
+        collapsed
+          ? 'pt-3 p-1 pl-2'
+          : 'p-3 pl-2 border border-transparent hover:border-border hover:bg-accent '
+      }rounded-lg `}>
+      <Icon className="w-8 h-8" />
+      {children}
+    </Link>
+  );
+};
 
 export const Navbar: React.FC = () => {
   const { events, onUpcomingEventClick } = useCalendar();
@@ -85,46 +116,21 @@ export const Navbar: React.FC = () => {
           <Separator />
           {/* Navigation Links */}
           <nav className="space-y-2 mb-4 mx-2 pt-2">
-            <Link
-              href="/overview"
-              className={`flex items-center space-x-3 ${
-                collapsed
-                  ? 'pt-3 p-1 pl-2'
-                  : 'p-3 pl-2 border border-transparent hover:border-border hover:bg-accent '
-              }rounded-lg `}>
-              <Home className="w-7 h-7" />
+            <NavLink href="/overview" icon={Home} collapsed={collapsed}>
               {!collapsed && <span>Overview</span>}
-            </Link>
-            <Link
-              href="/calendar"
-              className={`flex items-center space-x-3 ${
-                collapsed
-                  ? 'pt-3 p-1 pl-2'
-                  : 'p-3 pl-2 border border-transparent hover:border-border hover:bg-accent '
-              }rounded-lg `}>
-              <CalendarDays className="w-7 h-7" />
+            </NavLink>
+            <NavLink href="/calendar" icon={CalendarDays} collapsed={collapsed}>
               {!collapsed && <span>Calendar</span>}
-            </Link>
-            <Link
-              href="/habits"
-              className={`flex items-center space-x-3 ${
-                collapsed
-                  ? 'pt-3 p-1 pl-2'
-                  : 'p-3 pl-2 border border-transparent hover:border-border hover:bg-accent '
-              }rounded-lg `}>
-              <CheckSquare className="w-7 h-7" />
+            </NavLink>
+            <NavLink href="/habits" icon={CheckSquare} collapsed={collapsed}>
               {!collapsed && <span>Habits</span>}
-            </Link>
-            <Link
-              href="/goals"
-              className={`flex items-center space-x-3 ${
-                collapsed
-                  ? 'pt-3 p-1 pl-2'
-                  : 'p-3 pl-2 border border-transparent hover:border-border hover:bg-accent '
-              }rounded-lg `}>
-              <Flag className="w-7 h-7" />
+            </NavLink>
+            <NavLink href="/goals" icon={Flag} collapsed={collapsed}>
               {!collapsed && <span>Goals</span>}
-            </Link>
+            </NavLink>
+            <NavLink href="/notes" icon={NotebookPen} collapsed={collapsed}>
+              {!collapsed && <span>Notes</span>}
+            </NavLink>
           </nav>
           <Separator className={collapsed ? 'hidden' : 'flex'} />
           <>

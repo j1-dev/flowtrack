@@ -32,6 +32,7 @@ model User {
   sessions      Session[]
   tasks         Task[]
   goals         Goal[]
+  notes         Note[]
 }
 
 model Task {
@@ -49,6 +50,7 @@ model Task {
   priority    Priority @default(MEDIUM)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
+  notes       Note[]
 
   @@index([completed])
   @@index([userId])
@@ -67,6 +69,7 @@ model Habit {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   completedAt DateTime  @default(now())
+  notes       Note[]
 
   @@index([goalId])
 }
@@ -81,6 +84,24 @@ model Goal {
   habits      Habit[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  notes       Note[]
+
+  @@index([userId])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  taskId    String?
+  task      Task?    @relation(fields: [taskId], references: [id])
+  habitId   String?
+  habit     Habit?   @relation(fields: [habitId], references: [id])
+  goalId    String?
+  goal      Goal?    @relation(fields: [goalId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
 }

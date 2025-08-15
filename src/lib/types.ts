@@ -11,6 +11,7 @@ export type User = {
   tasks: Task[];
   habits: Habit[];
   goals: Goal[];
+  notes: Note[];
 };
 
 export type Task = {
@@ -28,6 +29,7 @@ export type Task = {
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
   createdAt: Date;
   updatedAt: Date;
+  notes: Note[];
 };
 
 export type Habit = {
@@ -42,6 +44,8 @@ export type Habit = {
   createdAt: Date;
   updatedAt: Date;
   completedAt: Date;
+
+  notes: Note[];
 };
 
 export type Goal = {
@@ -52,6 +56,23 @@ export type Goal = {
   user: User;
   tasks: Task[];
   habits: Habit[];
+  createdAt: Date;
+  updatedAt: Date;
+
+  notes: Note[];
+};
+
+export type Note = {
+  id: string;
+  content: string;
+  userId: string;
+  user: User;
+  taskId?: string | null;
+  task?: Task | null;
+  habitId?: string | null;
+  habit?: Habit | null;
+  goalId?: string | null;
+  goal?: Goal | null;
   createdAt: Date;
   updatedAt: Date;
 };
