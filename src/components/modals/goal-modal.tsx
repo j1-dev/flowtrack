@@ -95,15 +95,17 @@ export const GoalModal: React.FC<GoalModalProps> = ({
               />
             </div>
           </div>
-          <DialogFooter className="gap-2 sm:gap-0">
-            {initialGoal?.id && (
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={() => onDelete?.(initialGoal)}>
-                Delete Goal
-              </Button>
-            )}
+          <DialogFooter className="flex items-center justify-between gap-3">
+            <div className="flex-1">
+              {initialGoal?.id && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => onDelete?.(initialGoal)}>
+                  Delete Goal
+                </Button>
+              )}
+            </div>
             <div className="flex gap-2">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel

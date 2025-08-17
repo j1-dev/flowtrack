@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/card';
 import { Habit } from '@/lib/types';
 import { Button } from '@/components/ui/button';
+import { Pencil } from 'lucide-react';
 
 interface HabitCardProps {
   habit: Habit;
@@ -139,7 +140,7 @@ export const HabitCard = ({
             setIsModalOpen(true);
           }}
           className="opacity-0 group-hover:opacity-100 transition-opacity">
-          Edit
+          <Pencil className="w-4 h-4" />
         </Button>
         {shouldComplete(habit) ? (
           <Button

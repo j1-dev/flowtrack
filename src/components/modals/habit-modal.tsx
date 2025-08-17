@@ -19,7 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Goal, Habit } from '@/lib/types';
+import { Habit } from '@/lib/types';
+import { useUserData } from '../data-context';
 
 interface HabitModalProps {
   open: boolean;
@@ -41,18 +42,8 @@ export const HabitModal: React.FC<HabitModalProps> = ({
     'DAILY'
   );
   const [streak, setStreak] = useState(0);
-  const [goals, setGoals] = useState<Goal[]>([]);
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
-
-  // Fetch goals when modal opens
-  useEffect(() => {
-    if (open) {
-      fetch('/api/goals')
-        .then((res) => res.json())
-        .then((data) => setGoals(data))
-        .catch((error) => console.error('Error fetching goals:', error));
-    }
-  }, [open]);
+  const { goals } = useUserData();
 
   useEffect(() => {
     if (initialHabit) {
@@ -158,15 +149,17 @@ export const HabitModal: React.FC<HabitModalProps> = ({
             </div>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
-            {initialHabit?.id && (
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={() => onDelete?.(initialHabit)}>
-                Delete Habit
-              </Button>
-            )}
+          <DialogFooter className="flex items-center justify-between gap-3">
+            <div className="flex-1">
+              {initialHabit?.id && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => onDelete?.(initialHabit)}>
+                  Delete Habit
+                </Button>
+              )}
+            </div>
             <div className="flex gap-2">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel

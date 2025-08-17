@@ -201,7 +201,6 @@ const EventGroup = ({
                   }}
                   onTouchStart={(e) => {
                     e.preventDefault();
-                    // TODO: Implement touch resize logic if needed
                   }}
                 />
               )}

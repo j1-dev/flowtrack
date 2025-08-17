@@ -26,7 +26,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 // import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Task, Goal } from '@/lib/types';
+import { Task } from '@/lib/types';
+import { useUserData } from '../data-context';
 
 interface TaskModalProps {
   open: boolean;
@@ -59,18 +60,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   const [color, setColor] = useState<string>('#6366f1'); // Default to indigo-500
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<'LOW' | 'MEDIUM' | 'HIGH'>('MEDIUM');
-  const [goals, setGoals] = useState<Goal[]>([]);
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
+  const {goals} = useUserData();
 
   // Fetch goals when modal opens
-  useEffect(() => {
-    if (open) {
-      fetch('/api/goals')
-        .then((res) => res.json())
-        .then((data) => setGoals(data))
-        .catch((error) => console.error('Error fetching goals:', error));
-    }
-  }, [open]);
 
   useEffect(() => {
     if (initialTask) {
