@@ -7,7 +7,7 @@ import { ContextType, View } from './types';
 import { Locale } from 'date-fns';
 import { Task } from '@/lib/types';
 import { useUserData } from '@/components/data-context';
-import { TaskModal } from '@/components/modals/task-modal';
+import { TaskModal } from '@/components/modals/task-modal/task-modal';
 
 const Context = React.createContext<ContextType>({} as ContextType);
 
