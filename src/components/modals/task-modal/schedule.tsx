@@ -32,6 +32,21 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({
   onEndMinuteChange,
   disabled = false,
 }) => {
+  // Calculate minimum date and time for end selector
+  const getMinimumEndDateTime = () => {
+    if (!startDate) return undefined;
+
+    // Create a date that represents the minimum allowed end time
+    const minEndDate = new Date(startDate);
+
+    return {
+      date: minEndDate,
+      time: { hour: startHour, minute: startMinute },
+    };
+  };
+
+  const minimumEnd = getMinimumEndDateTime();
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <DateTimeSelector
@@ -53,6 +68,8 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({
         onHourChange={onEndHourChange}
         onMinuteChange={onEndMinuteChange}
         disabled={disabled}
+        minDate={minimumEnd?.date}
+        minTime={minimumEnd?.time}
       />
     </div>
   );

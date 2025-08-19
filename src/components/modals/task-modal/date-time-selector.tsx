@@ -18,6 +18,8 @@ interface DateTimeSelectorProps {
   onHourChange: (hour: string) => void;
   onMinuteChange: (minute: string) => void;
   disabled?: boolean;
+  minDate?: Date;
+  minTime?: { hour: string; minute: string };
 }
 
 export const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
@@ -29,7 +31,13 @@ export const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
   onHourChange,
   onMinuteChange,
   disabled = false,
+  minDate,
+  minTime,
 }) => {
+  // Check if the selected date is the same as the minimum date
+  const isSameDayAsMin =
+    minDate && date && date.toDateString() === minDate.toDateString();
+
   return (
     <div className="space-y-2">
       <Label className="block text-sm font-medium">{label}</Label>
@@ -48,7 +56,13 @@ export const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
             selected={date}
             onSelect={onDateChange}
             initialFocus
-            disabled={disabled}
+            disabled={(date) => {
+              if (disabled) return true;
+              if (minDate) {
+                return date < minDate;
+              }
+              return false;
+            }}
           />
         </PopoverContent>
       </Popover>
@@ -58,6 +72,7 @@ export const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
         onHourChange={onHourChange}
         onMinuteChange={onMinuteChange}
         disabled={disabled}
+        minTime={isSameDayAsMin ? minTime : undefined}
       />
     </div>
   );

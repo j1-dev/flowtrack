@@ -79,6 +79,24 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     }
   }, [initialTask, open]);
 
+  // Auto-adjust end date/time when start date/time changes
+  useEffect(() => {
+    if (startDate && endDate) {
+      const startDateTime = new Date(startDate);
+      startDateTime.setHours(Number(startHour), Number(startMinute));
+
+      const endDateTime = new Date(endDate);
+      endDateTime.setHours(Number(endHour), Number(endMinute));
+
+      // If end is before start, adjust end to match start
+      if (endDateTime <= startDateTime) {
+        setEndDate(new Date(startDate));
+        setEndHour(startHour);
+        setEndMinute(startMinute);
+      }
+    }
+  }, [startDate, startHour, startMinute]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !startDate || !endDate) return;
@@ -94,6 +112,12 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     end.setMinutes(Number(endMinute));
     end.setSeconds(0);
     end.setMilliseconds(0);
+
+    // Final validation to ensure end is not before start
+    if (end <= start) {
+      // Automatically set end to be 1 hour after start
+      end.setTime(start.getTime() + 60 * 60 * 1000);
+    }
 
     onSave({
       id: initialTask?.id || '',
