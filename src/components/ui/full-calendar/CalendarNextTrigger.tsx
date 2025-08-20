@@ -1,6 +1,6 @@
 import React, { forwardRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { addDays, addWeeks, addMonths, addYears } from 'date-fns';
+import { addDays, addMonths, addYears } from 'date-fns';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useCalendar } from './Calendar';
 
@@ -14,7 +14,8 @@ const CalendarNextTrigger = forwardRef<
     if (view === 'day') {
       setDate(addDays(date, 1));
     } else if (view === 'week') {
-      setDate(addWeeks(date, 1));
+      // Move week view one day forwards
+      setDate(addDays(date, 1));
     } else if (view === 'month') {
       setDate(addMonths(date, 1));
     } else if (view === 'year') {
