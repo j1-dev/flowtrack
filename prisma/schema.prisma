@@ -9,9 +9,9 @@ enum Priority {
 }
 
 enum Frequency {
-  DAILY
-  WEEKLY
-  MONTHLY
+  DAYS
+  WEEKS
+  MONTHS
 }
 
 datasource db {
@@ -61,6 +61,7 @@ model Habit {
   id          String    @id @default(cuid())
   name        String
   frequency   Frequency
+  amount      Int       @default(1)
   streak      Int       @default(0)
   userId      String
   user        User      @relation(fields: [userId], references: [id])

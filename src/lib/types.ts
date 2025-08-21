@@ -35,7 +35,8 @@ export type Task = {
 export type Habit = {
   id: string;
   name: string;
-  frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY';
+  frequency: 'DAYS' | 'WEEKS' | 'MONTHS';
+  amount: number;
   streak: number;
   userId: string;
   user: User;

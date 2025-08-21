@@ -16,10 +16,12 @@ export async function POST(req: Request) {
   if (!(typeof userOrResponse !== 'object' || 'id' in userOrResponse)) {
     return userOrResponse;
   }
-  const { name, frequency, streak, goalId } = await req.json();
+  const { name, frequency, amount, streak, goalId } = await req.json();
+  console.log(amount);
   const habit = await createHabit(userOrResponse.id, {
     name,
     frequency,
+    amount,
     streak,
     goalId,
   });

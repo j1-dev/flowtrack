@@ -93,6 +93,7 @@ export async function createHabit(
   data: {
     name: string;
     frequency: Frequency;
+    amount: number;
     streak?: number;
     goalId?: string | null;
   }
@@ -107,6 +108,7 @@ export async function updateHabitById(
   data: {
     name?: string;
     frequency?: Frequency;
+    amount?: number;
     streak?: number;
     goalId?: string | null;
     completedAt?: Date;

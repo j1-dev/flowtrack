@@ -38,9 +38,10 @@ export const HabitModal: React.FC<HabitModalProps> = ({
   initialHabit,
 }) => {
   const [name, setName] = useState('');
-  const [frequency, setFrequency] = useState<'DAILY' | 'WEEKLY' | 'MONTHLY'>(
-    'DAILY'
+  const [frequency, setFrequency] = useState<'DAYS' | 'WEEKS' | 'MONTHS'>(
+    'DAYS'
   );
+  const [amount, setAmount] = useState(1);
   const [streak, setStreak] = useState(0);
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
   const { goals } = useUserData();
@@ -49,11 +50,12 @@ export const HabitModal: React.FC<HabitModalProps> = ({
     if (initialHabit) {
       setName(initialHabit.name);
       setFrequency(initialHabit.frequency);
+      setAmount(initialHabit.amount);
       setStreak(initialHabit.streak || 0);
       setSelectedGoalId(initialHabit.goalId || null);
     } else {
       setName('');
-      setFrequency('DAILY');
+      setFrequency('DAYS');
       setStreak(0);
       setSelectedGoalId(null);
     }
@@ -66,6 +68,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
       id: initialHabit?.id || '',
       name,
       frequency,
+      amount,
       streak,
       goalId: selectedGoalId,
     } as Habit);
@@ -100,28 +103,43 @@ export const HabitModal: React.FC<HabitModalProps> = ({
               />
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="frequency">Frequency</Label>
-              <Select
-                value={frequency}
-                onValueChange={(value) =>
-                  setFrequency(value as 'DAILY' | 'WEEKLY' | 'MONTHLY')
-                }>
-                <SelectTrigger>
-                  <SelectValue>
-                    {frequency === 'DAILY'
-                      ? 'Daily'
-                      : frequency === 'WEEKLY'
-                      ? 'Weekly'
-                      : 'Monthly'}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="DAILY">Daily</SelectItem>
-                  <SelectItem value="WEEKLY">Weekly</SelectItem>
-                  <SelectItem value="MONTHLY">Monthly</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="amount">Amount</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  placeholder="Enter amount"
+                  value={amount}
+                  onChange={(e) => setAmount(Number(e.target.value))}
+                  min={1}
+                  required
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="frequency">Frequency</Label>
+                <Select
+                  value={frequency}
+                  onValueChange={(value) =>
+                    setFrequency(value as 'DAYS' | 'WEEKS' | 'MONTHS')
+                  }>
+                  <SelectTrigger className="w-full">
+                    <SelectValue>
+                      {frequency === 'DAYS'
+                        ? 'Days'
+                        : frequency === 'WEEKS'
+                        ? 'Weeks'
+                        : 'Months'}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DAYS">Days</SelectItem>
+                    <SelectItem value="WEEKS">Weeks</SelectItem>
+                    <SelectItem value="MONTHS">Months</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="grid gap-2">
@@ -131,7 +149,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
                 onValueChange={(value) =>
                   setSelectedGoalId(value === 'none' ? null : value)
                 }>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a goal">
                     {goals.find((g) => g.id === selectedGoalId)?.name ||
                       'No goal'}
@@ -149,7 +167,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
             </div>
           </div>
 
-          <DialogFooter className="flex items-center justify-between gap-3">
+          <DialogFooter className="flex items-center justify-between gap-3 pt-1">
             <div className="flex-1">
               {initialHabit?.id && (
                 <Button

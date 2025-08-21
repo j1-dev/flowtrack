@@ -33,17 +33,17 @@ export const HabitCard = ({
     let nextAvailable: Date;
 
     switch (habit.frequency) {
-      case 'DAILY':
+      case 'DAYS':
         nextAvailable = new Date(updatedAt);
-        nextAvailable.setDate(updatedAt.getDate() + 1);
+        nextAvailable.setDate(updatedAt.getDate() + (habit.amount || 1));
         break;
-      case 'WEEKLY':
+      case 'WEEKS':
         nextAvailable = new Date(updatedAt);
-        nextAvailable.setDate(updatedAt.getDate() + 7);
+        nextAvailable.setDate(updatedAt.getDate() + 7 * (habit.amount || 1));
         break;
-      case 'MONTHLY':
+      case 'MONTHS':
         nextAvailable = new Date(updatedAt);
-        nextAvailable.setMonth(updatedAt.getMonth() + 1);
+        nextAvailable.setMonth(updatedAt.getMonth() + (habit.amount || 1));
         break;
       default:
         return null;
@@ -70,18 +70,27 @@ export const HabitCard = ({
     const updatedAt = new Date(habit.completedAt);
 
     switch (habit.frequency) {
-      case 'DAILY':
-        return today.toDateString() !== updatedAt.toDateString();
-      case 'WEEKLY':
-        return (
-          (today.getTime() - updatedAt.getTime()) / (1000 * 60 * 60 * 24 * 7) >=
-          1
+      case 'DAYS': {
+        const diff = Math.floor(
+          (today.setHours(0, 0, 0, 0) -
+            new Date(updatedAt).setHours(0, 0, 0, 0)) /
+            (1000 * 60 * 60 * 24)
         );
-      case 'MONTHLY':
-        return (
-          today.getMonth() !== updatedAt.getMonth() ||
-          today.getFullYear() !== updatedAt.getFullYear()
+        return diff >= (habit.amount || 1);
+      }
+      case 'WEEKS': {
+        const diffDays = Math.floor(
+          (today.getTime() - updatedAt.getTime()) / (1000 * 60 * 60 * 24)
         );
+        const diffWeeks = Math.floor(diffDays / 7);
+        return diffWeeks >= (habit.amount || 1);
+      }
+      case 'MONTHS': {
+        const yearDiff = today.getFullYear() - updatedAt.getFullYear();
+        const monthDiff =
+          yearDiff * 12 + (today.getMonth() - updatedAt.getMonth());
+        return monthDiff >= (habit.amount || 1);
+      }
       default:
         return false;
     }
@@ -104,15 +113,18 @@ export const HabitCard = ({
           <div className="flex items-center gap-2">
             <div
               className={`h-2 w-2 rounded-full ${
-                habit.frequency === 'DAILY'
+                habit.frequency === 'DAYS'
                   ? 'bg-green-500'
-                  : habit.frequency === 'WEEKLY'
+                  : habit.frequency === 'WEEKS'
                   ? 'bg-blue-500'
                   : 'bg-purple-500'
               }`}
             />
             <span className="text-sm text-muted-foreground">
-              {habit.frequency.toLowerCase()}
+              Every{' '}
+              {habit.amount === 1
+                ? habit.frequency.toLowerCase().slice(0, -1)
+                : habit.amount + ' ' + habit.frequency.toLowerCase()}
             </span>
           </div>
           {getTimeUntilAvailable(habit) && (
