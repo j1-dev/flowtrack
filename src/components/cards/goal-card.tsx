@@ -44,11 +44,11 @@ export const GoalCard = ({ goal, onEdit, onDelete }: GoalCardProps) => {
         <div className="flex gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-blue-500" />
-            <span>{goal.tasks.length} tasks</span>
+            <span>{goal?.tasks?.length ?? 0} tasks</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-orange-500" />
-            <span>{goal.habits.length} habits</span>
+            <span>{goal?.habits?.length ?? 0} habits</span>
           </div>
         </div>
       </CardContent>

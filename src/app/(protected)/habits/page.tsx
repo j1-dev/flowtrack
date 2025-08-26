@@ -12,21 +12,18 @@ import Loading from '@/components/loading';
 function HabitsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
-  const { habits, refreshAll, loading } = useUserData();
+  const { habits, loading, createHabit, updateHabit, deleteHabit } =
+    useUserData();
 
   const handleSave = async (habit: Habit) => {
     try {
-      const url = habit.id ? `/api/habits/${habit.id}` : '/api/habits';
-      const method = habit.id ? 'PUT' : 'POST';
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(habit),
-      });
-      if (response.ok) {
-        refreshAll();
-        setIsModalOpen(false);
+      if (habit.id) {
+        await updateHabit(habit.id, habit);
+      } else {
+        const { ...habitData } = habit;
+        await createHabit(habitData);
       }
+      setIsModalOpen(false);
     } catch (error) {
       console.error('Error saving habit:', error);
     }
@@ -34,13 +31,8 @@ function HabitsPage() {
 
   const handleDelete = async (habit: Habit) => {
     try {
-      const response = await fetch(`/api/habits/${habit.id}`, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
-        refreshAll();
-        setIsModalOpen(false);
-      }
+      await deleteHabit(habit.id);
+      setIsModalOpen(false);
     } catch (error) {
       console.error('Error deleting habit:', error);
     }
@@ -48,27 +40,17 @@ function HabitsPage() {
 
   const handleIncrementStreak = async (habit: Habit) => {
     try {
-      const response = await fetch(`/api/habits/${habit.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...habit,
-          streak: habit.streak + 1,
-          completedAt: new Date(),
-        }),
+      await updateHabit(habit.id, {
+        streak: habit.streak + 1,
+        completedAt: new Date(),
       });
-      if (response.ok) {
-        refreshAll();
-      }
     } catch (error) {
       console.error('Error updating habit streak:', error);
     }
   };
 
   if (loading) {
-    return (
-      <Loading text="Loading Habits..." />
-    );
+    return <Loading text="Loading Habits..." />;
   }
 
   return (

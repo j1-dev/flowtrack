@@ -12,14 +12,12 @@ import Loading from '@/components/loading';
 export default function GoalsPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
-  const { goals, refreshAll, loading } = useUserData();
+  const { goals, loading, createGoal, updateGoal, deleteGoal } = useUserData();
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this goal?')) return;
     try {
-      const response = await fetch(`/api/goals/${id}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete goal');
-      refreshAll();
+      await deleteGoal(id);
     } catch (error) {
       console.error('Error deleting goal:', error);
     }
@@ -27,20 +25,15 @@ export default function GoalsPage() {
 
   const handleSave = async (goal: Goal) => {
     try {
-      const url = editingGoal ? `/api/goals/${editingGoal.id}` : '/api/goals';
-      const method = editingGoal ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      if (editingGoal) {
+        await updateGoal(editingGoal.id, {
           name: goal.name,
           description: goal.description,
-        }),
-      });
-
-      if (!response.ok) throw new Error('Failed to save goal');
-      refreshAll();
+        });
+      } else {
+        await createGoal(goal.name ?? '', goal.description ?? '');
+      }
+      setIsOpen(false);
     } catch (error) {
       console.error('Error saving goal:', error);
     }

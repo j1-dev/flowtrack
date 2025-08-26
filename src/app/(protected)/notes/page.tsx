@@ -121,7 +121,8 @@ const NoteCard = ({
 };
 
 function NotesPage() {
-  const { tasks, habits, goals, notes, loading, refreshAll } = useUserData();
+  const { tasks, habits, goals, notes, loading, createNote, deleteNote } =
+    useUserData();
   const [content, setContent] = useState('');
   const [taskId, setTaskId] = useState<string | null>(null);
   const [habitId, setHabitId] = useState<string | null>(null);
@@ -134,21 +135,28 @@ function NotesPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/notes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, taskId, habitId, goalId }),
+      await createNote({
+        content,
+        taskId: taskId || null,
+        habitId: habitId || null,
+        goalId: goalId || null,
+        userId: '', // Will be set by the server
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        user: {
+          id: '',
+          email: '',
+          createdAt: new Date(),
+          tasks: [],
+          habits: [],
+          goals: [],
+          notes: [],
+        },
       });
-
-      if (response.ok) {
-        setContent('');
-        setTaskId(null);
-        setHabitId(null);
-        setGoalId(null);
-        refreshAll();
-      } else {
-        console.error('Failed to send note');
-      }
+      setContent('');
+      setTaskId(null);
+      setHabitId(null);
+      setGoalId(null);
     } catch (error) {
       console.error('Error sending note:', error);
     } finally {
@@ -158,14 +166,7 @@ function NotesPage() {
 
   const handleDeleteNote = async (noteId: string) => {
     try {
-      const response = await fetch(`/api/notes/${noteId}`, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
-        refreshAll();
-      } else {
-        console.error('Failed to delete note');
-      }
+      await deleteNote(noteId);
     } catch (error) {
       console.error('Error deleting note:', error);
     }

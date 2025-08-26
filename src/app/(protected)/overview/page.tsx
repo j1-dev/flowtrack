@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { useUserData } from '@/components/data-context';
-import { Goal } from '@/lib/types';
+import { Goal, Task, Habit } from '@/lib/types';
 import { DashboardHeader } from '@/components/overview/dashboard-header';
 import { UpcomingTasks } from '@/components/overview/upcoming-tasks';
 import { TodaysHabits } from '@/components/overview/today-habits';
@@ -67,7 +67,7 @@ const isToday = (date: string | number | Date) => {
 };
 
 function OverviewPage() {
-  const { tasks, habits, goals, refreshAll } = useUserData();
+  const { tasks, habits, goals, updateTask, updateHabit } = useUserData();
 
   // Quick stats
   const todayTasks = tasks.filter((task) => isToday(new Date(task.start)));
@@ -80,10 +80,12 @@ function OverviewPage() {
 
   const calculateGoalProgress = (goal: Goal) => {
     const totalTasks = goal.tasks.length;
-    const completedTasks = goal.tasks.filter((task) => task.completed).length;
+    const completedTasks = goal.tasks.filter(
+      (task: Task) => task.completed
+    ).length;
     const hasHabits = goal.habits.length > 0;
     const habitProgress = goal.habits.reduce(
-      (acc, habit) => acc + Math.min(habit.streak / 7, 1),
+      (acc: number, habit: Habit) => acc + Math.min(habit.streak / 7, 1),
       0
     );
 
@@ -107,38 +109,29 @@ function OverviewPage() {
 
   const handleTaskComplete = async (
     taskId: string,
-    completed: string | boolean
+    completed: boolean | string
   ) => {
     const selectedTask = tasks.find((task) => task.id === taskId);
     if (!selectedTask) return;
 
-    await fetch(`/api/tasks/${taskId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...selectedTask, completed }),
-    });
-    refreshAll();
+    // Ensure completed is a boolean
+    const completedBool = typeof completed === 'boolean' ? completed : completed === 'true';
+    await updateTask(taskId, { completed: completedBool });
   };
 
   const handleHabitComplete = async (
     habitId: string,
-    completed: string | boolean
+    completed: boolean | string
   ) => {
     if (!completed) return;
 
     const habit = habits.find((h) => h.id === habitId);
     if (!habit) return;
 
-    await fetch(`/api/habits/${habitId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...habit,
-        streak: habit.streak + 1,
-        completedAt: new Date(),
-      }),
+    await updateHabit(habitId, {
+      streak: habit.streak + 1,
+      completedAt: new Date(),
     });
-    refreshAll();
   };
 
   return (
