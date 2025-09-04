@@ -51,23 +51,23 @@ export default function GoalsPage() {
   return (
     <div className="max-w-7xl mx-auto p-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div className="space-y-1">
+      <div className="justify-between items-center mb-8">
+        <div className="space-y-1 flex justify-between">
           <h1 className="text-2xl font-bold tracking-tight">Goals</h1>
-          <p className="text-sm text-muted-foreground">
-            Organize your habits and tasks with meaningful goals
-          </p>
+          <Button
+            size="sm"
+            className="px-3"
+            onClick={() => {
+              setEditingGoal(null);
+              setIsOpen(true);
+            }}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Goal
+          </Button>
         </div>
-        <Button
-          size="sm"
-          className="px-3"
-          onClick={() => {
-            setEditingGoal(null);
-            setIsOpen(true);
-          }}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Goal
-        </Button>
+        <p className="text-sm text-muted-foreground pt-2 sm:pt-0">
+          Organize your habits and tasks with meaningful goals
+        </p>
       </div>
 
       {/* Goals grid */}

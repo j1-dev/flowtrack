@@ -20,7 +20,6 @@ const CalendarPage: FC = () => {
   const { status } = useSession();
   const router = useRouter();
   const [width, setWidth] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -31,7 +30,6 @@ const CalendarPage: FC = () => {
     const handleResize = () => {
       const newWidth = window.innerWidth;
       setWidth(newWidth);
-      setIsMobile(newWidth < 768);
     };
 
     handleResize(); // Set initial values
@@ -139,13 +137,7 @@ const CalendarPage: FC = () => {
           </div>
 
           {/* Calendar views container - responsive height */}
-          <div
-            className="flex-1 min-h-0"
-            style={{
-              height: isMobile
-                ? 'calc(100vh)' // Account for mobile header + controls
-                : 'calc(100vh - 240px)', // Account for desktop header + controls
-            }}>
+          <div className="flex-1 min-h-0">
             <CalendarDayView />
             <CalendarWeekView />
             <CalendarMonthView />

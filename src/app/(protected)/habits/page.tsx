@@ -55,23 +55,23 @@ function HabitsPage() {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-8">
-        <div className="space-y-1">
+      <div className="justify-between items-center mb-8">
+        <div className="space-y-1 flex justify-between">
           <h1 className="text-2xl font-bold tracking-tight">Habits</h1>
-          <p className="text-sm text-muted-foreground">
-            Track and maintain your daily, weekly, and monthly habits
-          </p>
+          <Button
+            size="sm"
+            className="px-3"
+            onClick={() => {
+              setSelectedHabit(null);
+              setIsModalOpen(true);
+            }}>
+            <Plus className="w-4 h-4 mr-2" />
+            New Habit
+          </Button>
         </div>
-        <Button
-          size="sm"
-          className="px-3"
-          onClick={() => {
-            setSelectedHabit(null);
-            setIsModalOpen(true);
-          }}>
-          <Plus className="w-4 h-4 mr-2" />
-          New Habit
-        </Button>
+        <p className="text-sm text-muted-foreground pt-2 md:pt-0">
+          Track and maintain your daily, weekly, and monthly habits
+        </p>
       </div>
       {habits.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 px-4">

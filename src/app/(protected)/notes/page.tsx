@@ -37,10 +37,10 @@ const DataSelect = ({
   placeholder: string;
   icon: React.ReactNode;
 }) => (
-  <div className="flex items-center gap-3">
-    <div className="text-foreground">{icon}</div>
+  <div className="relative w-full">
+    <div className="absolute left-2 top-1/2 -translate-y-1/2 text-foreground/50">{icon}</div>
     <Select value={value ?? ''} onValueChange={onChange}>
-      <SelectTrigger>
+      <SelectTrigger className="w-full pl-8 h-9 text-sm">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
@@ -77,13 +77,13 @@ const NoteCard = ({
   };
 
   return (
-    <div className="relative rounded-lg p-6 mb-4 border group">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2 text-sm ">
+    <div className="relative rounded-lg p-4 mb-4 border group bg-background shadow-sm hover:border-foreground/20 transition-colors">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+        <div className="flex items-center gap-2 text-sm order-2 sm:order-1">
           <Clock className="w-4 h-4" />
           {formatDate(note.createdAt.toString())}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 order-1 sm:order-2">
           {note.taskId && (
             <span className="px-2 py-1 text-xs dark:bg-green-900/30 dark:text-green-400 bg-green-300 text-green-900 rounded-md flex items-center gap-1">
               <CheckSquare className="w-3 h-3" />
@@ -205,46 +205,46 @@ function NotesPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-3xl mx-auto px-6">
       {/* Note Composer */}
-      <div className="bg-muted rounded-lg p-6 pb-0 mb-8 border">
+      <div className="bg-background rounded-lg p-4 sm:p-6 pb-0 mb-8 border shadow-sm">
         <Textarea
           placeholder="What's on your mind? Share your thoughts, insights, or reflections..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="h-24 bg-transparent border-none text-foreground placeholder-gray-400 resize-none focus:ring-0 focus:outline-none text-base mb-4"
+          className="min-h-[120px] bg-transparent border-none text-foreground placeholder-foreground/40 resize-none focus:ring-0 focus:outline-none text-base leading-relaxed mb-6"
         />
 
         {/* Attachments */}
-        <div className="flex items-center justify-between gap-3 mb-6">
-          <div className="flex gap-3">
+        <div className="space-y-3 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <DataSelect
               data={tasks || []}
               value={taskId}
               onChange={setTaskId}
               placeholder="Link to a task (optional)"
-              icon={<CheckSquare className="w-4 h-4" />}
+              icon={<CheckSquare className="w-3.5 h-3.5" />}
             />
             <DataSelect
               data={habits || []}
               value={habitId}
               onChange={setHabitId}
               placeholder="Link to a habit (optional)"
-              icon={<Repeat className="w-4 h-4" />}
+              icon={<Repeat className="w-3.5 h-3.5" />}
             />
             <DataSelect
               data={goals || []}
               value={goalId}
               onChange={setGoalId}
               placeholder="Link to a goal (optional)"
-              icon={<Target className="w-4 h-4" />}
+              icon={<Target className="w-3.5 h-3.5" />}
             />
           </div>
           <Button
             onClick={handleSendNote}
             disabled={!content.trim() || isSubmitting}
-            className="bg-foreground text-background flex items-center gap-2">
+            className="bg-foreground text-background flex items-center gap-2 w-full">
             <Send className="w-4 h-4" />
             {isSubmitting ? 'Posting...' : 'Post Note'}
           </Button>
@@ -288,12 +288,12 @@ function NotesPage() {
       </div>
 
       {/* Timeline */}
-      <div className="h-[50vh] overflow-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-foreground">
+      <div className="h-[calc(100vh-16rem)] overflow-auto">
+        <div className="flex items-center justify-between mb-6 sticky top-0 bg-background py-2 z-10 border-b">
+          <h2 className="text-lg font-semibold text-foreground">
             Your Timeline
           </h2>
-          <span className="px-2 py-1 text-xs text-foreground/30 rounded border">
+          <span className="text-xs text-foreground/50">
             {sortedNotes.length} notes
           </span>
         </div>
@@ -314,9 +314,9 @@ function NotesPage() {
             <div className="absolute left-6 top-0 bottom-0 w-0.5 "></div>
 
             {sortedNotes.map((note) => (
-              <div key={note.id} className="relative pl-16">
+              <div key={note.id} className="relative pl-6 sm:pl-12">
                 {/* Timeline dot */}
-                <div className="absolute left-4 w-4 h-4 bg-background rounded-full border-4 border-gray-900"></div>
+                <div className="absolute left-0 w-2 h-2 bg-foreground/50 rounded-full top-7"></div>
 
                 <NoteCard note={note} onDelete={handleDeleteNote} />
               </div>

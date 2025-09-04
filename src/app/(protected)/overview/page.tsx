@@ -7,6 +7,7 @@ import { UpcomingTasks } from '@/components/overview/upcoming-tasks';
 import { TodaysHabits } from '@/components/overview/today-habits';
 import { GoalsProgress } from '@/components/overview/goals-progress';
 import { ActivityChart } from '@/components/overview/activity-graph';
+import { useSession } from 'next-auth/react';
 
 const format = (date: string | number | Date, formatStr: string) => {
   const d = new Date(date);
@@ -68,6 +69,7 @@ const isToday = (date: string | number | Date) => {
 
 function OverviewPage() {
   const { tasks, habits, goals, updateTask, updateHabit } = useUserData();
+  const { data } = useSession();
 
   // Quick stats
   const todayTasks = tasks.filter((task) => isToday(new Date(task.start)));
@@ -79,12 +81,12 @@ function OverviewPage() {
   ).length;
 
   const calculateGoalProgress = (goal: Goal) => {
-    const totalTasks = goal.tasks.length;
-    const completedTasks = goal.tasks.filter(
+    const totalTasks = goal?.tasks?.length ?? 0;
+    const completedTasks = goal?.tasks?.filter(
       (task: Task) => task.completed
     ).length;
-    const hasHabits = goal.habits.length > 0;
-    const habitProgress = goal.habits.reduce(
+    const hasHabits = goal?.habits?.length > 0;
+    const habitProgress = goal?.habits?.reduce(
       (acc: number, habit: Habit) => acc + Math.min(habit.streak / 7, 1),
       0
     );
@@ -115,7 +117,8 @@ function OverviewPage() {
     if (!selectedTask) return;
 
     // Ensure completed is a boolean
-    const completedBool = typeof completed === 'boolean' ? completed : completed === 'true';
+    const completedBool =
+      typeof completed === 'boolean' ? completed : completed === 'true';
     await updateTask(taskId, { completed: completedBool });
   };
 
@@ -140,6 +143,7 @@ function OverviewPage() {
         completedToday={completedToday}
         completedHabitsToday={completedHabitsToday}
         goalsProgress={goalsProgress}
+        userName={data?.user?.name ?? ''}
         format={format}
       />
 

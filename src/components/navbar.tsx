@@ -26,7 +26,8 @@ export const NavLink: React.FC<{
   >;
   children: React.ReactNode;
   collapsed: boolean;
-}> = ({ href, icon: Icon, children, collapsed }) => {
+  onClick: () => void;
+}> = ({ href, icon: Icon, children, collapsed, onClick }) => {
   return (
     <Link
       href={href}
@@ -34,7 +35,8 @@ export const NavLink: React.FC<{
         collapsed
           ? 'pt-3 p-1 pl-2'
           : 'p-3 pl-2 border border-transparent hover:border-border hover:bg-accent '
-      }rounded-lg `}>
+      } rounded-lg `}
+      onClick={() => onClick()}>
       <Icon className="w-8 h-8" />
       {children}
     </Link>
@@ -64,7 +66,7 @@ export const Navbar: React.FC = () => {
     <>
       {/* Mobile menu button (fixed, top left) */}
       <button
-        className="w-6 h-6 absolute top-[30px] left-4 z-40 md:hidden p-2"
+        className="w-6 h-6 absolute top-[30px] left-4 z-40 md:hidden py-3"
         onClick={() => setOpen(true)}
         aria-label="Open menu">
         <Menu className="w-6 h-6" />
@@ -116,19 +118,39 @@ export const Navbar: React.FC = () => {
           <Separator />
           {/* Navigation Links */}
           <nav className="space-y-2 mb-4 mx-2 pt-2">
-            <NavLink href="/overview" icon={Home} collapsed={collapsed}>
+            <NavLink
+              href="/overview"
+              icon={Home}
+              collapsed={collapsed}
+              onClick={() => setOpen((c) => !c)}>
               {!collapsed && <span>Overview</span>}
             </NavLink>
-            <NavLink href="/calendar" icon={CalendarDays} collapsed={collapsed}>
+            <NavLink
+              href="/calendar"
+              icon={CalendarDays}
+              collapsed={collapsed}
+              onClick={() => setOpen((c) => !c)}>
               {!collapsed && <span>Calendar</span>}
             </NavLink>
-            <NavLink href="/habits" icon={CheckSquare} collapsed={collapsed}>
+            <NavLink
+              href="/habits"
+              icon={CheckSquare}
+              collapsed={collapsed}
+              onClick={() => setOpen((c) => !c)}>
               {!collapsed && <span>Habits</span>}
             </NavLink>
-            <NavLink href="/goals" icon={Flag} collapsed={collapsed}>
+            <NavLink
+              href="/goals"
+              icon={Flag}
+              collapsed={collapsed}
+              onClick={() => setOpen((c) => !c)}>
               {!collapsed && <span>Goals</span>}
             </NavLink>
-            <NavLink href="/notes" icon={NotebookPen} collapsed={collapsed}>
+            <NavLink
+              href="/notes"
+              icon={NotebookPen}
+              collapsed={collapsed}
+              onClick={() => setOpen((c) => !c)}>
               {!collapsed && <span>Notes</span>}
             </NavLink>
           </nav>

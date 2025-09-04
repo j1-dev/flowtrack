@@ -9,10 +9,10 @@ interface GoalsProgressProps {
 
 export function GoalsProgress({ goals }: GoalsProgressProps) {
   const calculateProgress = (goal: Goal) => {
-    const totalTasks = goal.tasks.length;
-    const completedTasks = goal.tasks.filter((task) => task.completed).length;
-    const hasHabits = goal.habits.length > 0;
-    const habitProgress = goal.habits.reduce(
+    const totalTasks = goal?.tasks?.length;
+    const completedTasks = goal?.tasks?.filter((task) => task.completed).length;
+    const hasHabits = goal?.habits?.length > 0;
+    const habitProgress = goal?.habits?.reduce(
       (acc, habit) => acc + Math.min(habit.streak / 7, 1),
       0
     );

@@ -42,7 +42,7 @@ export default function ProtectedLayout({
             </header>
 
             {/* Content section */}
-            <div className="flex-1 px-4 sm:px-6 lg:px-8 py-4 lg:py-6 min-h-0 overflow-hidden">
+            <div className="flex-1 px-6 lg:px-8 py-4 lg:py-6 min-h-0 overflow-hidden">
               {children}
             </div>
           </main>
