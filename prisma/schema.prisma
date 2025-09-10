@@ -17,15 +17,15 @@ enum Frequency {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  // directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
+  id            String     @id @default(cuid())
+  email         String     @unique
   name          String?
   image         String?
-  createdAt     DateTime  @default(now())
+  createdAt     DateTime   @default(now())
   emailVerified DateTime?
   accounts      Account[]
   habits        Habit[]
@@ -33,24 +33,27 @@ model User {
   tasks         Task[]
   goals         Goal[]
   notes         Note[]
+  Schedule      Schedule[]
 }
 
 model Task {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
   description String?
   start       DateTime
   end         DateTime
   color       String?
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  completed   Boolean  @default(false)
+  user        User      @relation(fields: [userId], references: [id])
+  completed   Boolean   @default(false)
   goalId      String?
-  goal        Goal?    @relation(fields: [goalId], references: [id])
-  priority    Priority @default(MEDIUM)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
+  goal        Goal?     @relation(fields: [goalId], references: [id])
+  priority    Priority  @default(MEDIUM)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
   notes       Note[]
+  Schedule    Schedule? @relation(fields: [scheduleId], references: [id])
+  scheduleId  String?
 
   @@index([completed])
   @@index([userId])
@@ -103,6 +106,19 @@ model Note {
   goal      Goal?    @relation(fields: [goalId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Schedule {
+  id        String   @id @default(cuid())
+  name      String
+  type      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tasks     Task[]
 
   @@index([userId])
 }

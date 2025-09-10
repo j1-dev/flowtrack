@@ -59,7 +59,6 @@ export type Goal = {
   habits: Habit[];
   createdAt: Date;
   updatedAt: Date;
-
   notes: Note[];
 };
 
@@ -77,4 +76,14 @@ export type Note = {
   createdAt: Date;
   updatedAt: Date;
 };
-// You can also add types for Account, Session, and VerificationToken if needed
+
+export type Schedule = {
+  id: string;
+  name: string;
+  type: 'DAY' | 'WEEK';
+  userId: string;
+  user: User;
+  createdAt: Date;
+  updatedAt: Date;
+  tasks: Task[];
+};
