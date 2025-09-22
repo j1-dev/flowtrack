@@ -91,7 +91,7 @@ const EventGroup = ({
                 e.stopPropagation();
                 if (onEventClick) onEventClick(event);
               }}
-              key={event.id + '-' + dayStart.toISOString()}
+              key={Math.random()}
               className={`absolute font-bold border-l-4 rounded p-2 text-xs w-full ${
                 event.completed ? 'opacity-50' : 'cursor-move group'
               }`}

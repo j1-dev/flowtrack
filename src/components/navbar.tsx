@@ -193,7 +193,7 @@ export const Navbar: React.FC = () => {
               <div className="space-y-2 px-4">
                 {upcomingTasks.map((task) => (
                   <div
-                    key={task.id}
+                    key={Math.random()}
                     className="p-2 rounded-lg bg-accent/50 hover:bg-accent cursor-pointer"
                     onClick={() => onUpcomingEventClick?.(task)}
                     style={{

@@ -77,18 +77,33 @@ const CalendarPage: FC = () => {
     });
   };
 
-  const handleSave = ({ name }: Schedule) => {
+  const handleSave = async ({ name }: Schedule) => {
     const selectedDay = date;
     const selectedDayStart = new Date(selectedDay.setHours(0, 0, 0, 0));
     const selectedDayEnd = new Date(selectedDay.setHours(23, 59, 59, 99));
 
-    const selectedTasksIds = tasks
-      .filter(
-        (task) => task.start > selectedDayStart && task.start < selectedDayEnd
-      )
-      .map((t) => t.id);
+    const filteredTasks = tasks.filter(
+      (task) => task.start > selectedDayStart && task.start < selectedDayEnd
+    );
 
-    createSchedule(name, view.toUpperCase(), selectedTasksIds);
+    const baseTasks = filteredTasks.map((task) => ({
+      ...task,
+      id: '',
+      start: new Date(task.start),
+      end: new Date(task.end),
+    }));
+
+    baseTasks.forEach((baseTask) => {
+      baseTask.start.setFullYear(1975, 0, 1);
+      baseTask.end.setFullYear(1975, 0, 1);
+    });
+
+    const createdTasks = await Promise.all(
+      baseTasks.map((task) => createTask(task))
+    );
+    const selectedTasksIds = createdTasks.map((task) => task.id);
+
+    await createSchedule(name, view.toUpperCase(), selectedTasksIds);
   };
 
   if (status === 'loading') {
