@@ -85,7 +85,7 @@ export const Navbar: React.FC = () => {
 
       {/* Sidebar: always visible on desktop, drawer on mobile */}
       <nav
-        className={`fixed top-0 left-0 h-screen bg-card border-r border-border z-50 flex flex-col transition-transform duration-300
+        className={`fixed top-0 left-0 h-full bg-card border-r border-border z-50 flex flex-col transition-transform duration-300
           ${open ? 'translate-x-0' : '-translate-x-full'}
           md:static md:translate-x-0 md:flex
           ${collapsed ? 'w-14' : 'w-63'} md:transition-all md:translate-x-0`}

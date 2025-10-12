@@ -25,7 +25,7 @@ export default function ProtectedLayout({
           {/* Main content - responsive layout */}
           <main className="flex-1 flex flex-col min-h-0 lg:overflow-hidden">
             {/* Header - only show on larger screens since navbar handles mobile */}
-            <header className="hidden lg:block flex-shrink-0 px-4 pt-5 pb-3 border-b border-border">
+            <header className="hidden lg:block flex-shrink-0 px-4 pt-5 pb-3 border-b border-border relative">
               <div className="flex items-center justify-between">
                 <div className="text-4xl font-black capitalize">
                   {/* Get the last segment of the URL path as the page title */}
@@ -34,7 +34,7 @@ export default function ProtectedLayout({
                     usePathname().split('/').pop() || 'Overview'
                   )}
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 absolute right-6 top-4">
                   <ThemeSwitcher />
                   <AuthButtons />
                 </div>
