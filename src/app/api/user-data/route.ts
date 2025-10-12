@@ -9,7 +9,7 @@ export async function GET() {
   }
 
   try {
-    const [user, tasks, habits, goals, notes, schedules] = await Promise.all([
+    const [user, tasks, habits, goals, notes] = await Promise.all([
       prisma.user.findUnique({ where: { id: userOrResponse.id } }),
       prisma.task.findMany({ where: { userId: userOrResponse.id } }),
       prisma.habit.findMany({ where: { userId: userOrResponse.id } }),
@@ -25,13 +25,9 @@ export async function GET() {
         where: { userId: userOrResponse.id },
         orderBy: { createdAt: 'desc' },
       }),
-      prisma.schedule.findMany({
-        where: { userId: userOrResponse.id },
-        include: { tasks: true },
-      }),
     ]);
 
-    return NextResponse.json({ user, tasks, habits, goals, notes, schedules });
+    return NextResponse.json({ user, tasks, habits, goals, notes });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
