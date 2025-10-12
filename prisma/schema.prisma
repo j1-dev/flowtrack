@@ -33,7 +33,7 @@ model User {
   tasks         Task[]
   goals         Goal[]
   notes         Note[]
-  Schedule      Schedule[]
+  // Schedule      Schedule[]
 }
 
 model Task {
@@ -52,7 +52,7 @@ model Task {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now()) @updatedAt
   notes       Note[]
-  Schedule    Schedule? @relation(fields: [scheduleId], references: [id])
+  // Schedule    Schedule? @relation(fields: [scheduleId], references: [id])
   scheduleId  String?
 
   @@index([completed])
@@ -110,18 +110,18 @@ model Note {
   @@index([userId])
 }
 
-model Schedule {
-  id        String   @id @default(cuid())
-  name      String
-  type      String
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  tasks     Task[]
+// model Schedule {
+//   id        String   @id @default(cuid())
+//   name      String
+//   type      String
+//   userId    String
+//   user      User     @relation(fields: [userId], references: [id])
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   tasks     Task[]
 
-  @@index([userId])
-}
+//   @@index([userId])
+// }
 
 model Account {
   id                String  @id @default(cuid())

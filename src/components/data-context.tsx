@@ -7,7 +7,7 @@ import React, {
   useState,
   useCallback,
 } from 'react';
-import type { User, Task, Habit, Goal, Note, Schedule } from '@/lib/types';
+import type { User, Task, Habit, Goal, Note } from '@/lib/types';
 
 type DataContextType = {
   user: User | null;
@@ -15,7 +15,6 @@ type DataContextType = {
   habits: Habit[];
   goals: Goal[];
   notes: Note[];
-  schedules: Schedule[];
   loading: boolean;
   error: string | null;
   refreshAll: () => Promise<void>;
@@ -31,16 +30,6 @@ type DataContextType = {
   createNote: (note: Omit<Note, 'id'>) => Promise<Note>;
   updateNote: (noteId: string, updates: Partial<Note>) => Promise<void>;
   deleteNote: (noteId: string) => Promise<void>;
-  createSchedule: (
-    name: string,
-    type: string,
-    tasksIds: string[]
-  ) => Promise<Schedule>;
-  updateSchedule: (
-    scheduleId: string,
-    updates: Partial<Schedule>
-  ) => Promise<void>;
-  deleteSchedule: (scheduleId: string) => Promise<void>;
 };
 
 const DataContext = createContext<DataContextType>({
@@ -49,7 +38,6 @@ const DataContext = createContext<DataContextType>({
   habits: [],
   goals: [],
   notes: [],
-  schedules: [],
   loading: true,
   error: null,
   refreshAll: async () => {},
@@ -68,10 +56,6 @@ const DataContext = createContext<DataContextType>({
   createNote: async () => null as unknown as Note,
   updateNote: async () => {},
   deleteNote: async () => {},
-  // Schedule operations
-  createSchedule: async () => null as unknown as Schedule,
-  updateSchedule: async () => {},
-  deleteSchedule: async () => {},
 });
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
@@ -80,7 +64,6 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -94,7 +77,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       });
       if (!res.ok) throw new Error('Failed to fetch user data');
 
-      const { user, tasks, habits, goals, notes, schedules } = await res.json();
+      const { user, tasks, habits, goals, notes } = await res.json();
 
       setUser(user);
       setTasks(
@@ -107,7 +90,6 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       setHabits(habits);
       setGoals(goals);
       setNotes(notes);
-      setSchedules(schedules);
     } catch (err) {
       console.error(err);
       setError('Failed to load user data');
@@ -198,9 +180,6 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
               ? {
                   ...h,
                   ...data,
-                  completedAt: data.completedAt
-                    ? new Date(data.completedAt)
-                    : null,
                 }
               : h
           )
@@ -299,46 +278,6 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     [notes]
   );
 
-  const updateSchedule = useCallback(
-    async (scheduleId: string, updates: Partial<Schedule>) => {
-      const scheduleIndex = schedules.findIndex((s) => s.id === scheduleId);
-      if (scheduleIndex === -1) return;
-
-      const previousSchedule = schedules[scheduleIndex];
-      // Optimistically update local state
-      setSchedules((prev) => {
-        const next = [...prev];
-        next[scheduleIndex] = { ...previousSchedule, ...updates };
-        return next;
-      });
-
-      try {
-        const res = await fetch(`/api/schedules/${scheduleId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...previousSchedule, ...updates }),
-        });
-        if (!res.ok) throw new Error('Failed to update schedule');
-
-        const data = await res.json();
-        // Update with server response
-        setSchedules((prev) =>
-          prev.map((s) => (s.id === scheduleId ? { ...s, ...data } : s))
-        );
-      } catch (err) {
-        console.error('Failed to update schedule:', err);
-        setError('Failed to update schedule');
-        // Rollback to previous state
-        setSchedules((prev) => {
-          const next = [...prev];
-          next[scheduleIndex] = previousSchedule;
-          return next;
-        });
-      }
-    },
-    [schedules]
-  );
-
   // Task CRUD operations
   const createTask = useCallback(async (taskData: Omit<Task, 'id'>) => {
     const tempId = `temp-${Date.now()}`;
@@ -416,9 +355,6 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
           h.id === tempId
             ? {
                 ...newHabit,
-                completedAt: newHabit.completedAt
-                  ? new Date(newHabit.completedAt)
-                  : null,
               }
             : h
         )
@@ -544,60 +480,6 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     [notes]
   );
 
-  // Schedule CRUD operations
-  const createSchedule = useCallback(
-    async (name: string, type: string, taskIds: string[]) => {
-      const tempId = `temp-${Date.now()}`;
-      const optimisticSchedule = { name, type, id: tempId } as Schedule;
-
-      setSchedules((prev) => [...prev, optimisticSchedule]);
-
-      try {
-        console.log(name, type, taskIds)
-        const res = await fetch('/api/schedule', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, type, taskIds }),
-        });
-        if (!res.ok) throw new Error('Failed to create schedule');
-
-        const newSchedule = await res.json();
-        setSchedules((prev) =>
-          prev.map((s) => (s.id === tempId ? newSchedule : s))
-        );
-        return newSchedule;
-      } catch (err) {
-        console.error('Failed to create schedule:', err);
-        setError('Failed to create schedule');
-        setSchedules((prev) => prev.filter((s) => s.id !== tempId));
-        throw err;
-      }
-    },
-    []
-  );
-
-  const deleteSchedule = useCallback(
-    async (scheduleId: string) => {
-      const scheduleToDelete = schedules.find((s) => s.id === scheduleId);
-      if (!scheduleToDelete) return;
-
-      setSchedules((prev) => prev.filter((s) => s.id !== scheduleId));
-
-      try {
-        const res = await fetch(`/api/schedules/${scheduleId}`, {
-          method: 'DELETE',
-        });
-        if (!res.ok) throw new Error('Failed to delete schedule');
-      } catch (err) {
-        console.error('Failed to delete schedule:', err);
-        setError('Failed to delete schedule');
-        setSchedules((prev) => [...prev, scheduleToDelete]);
-        throw err;
-      }
-    },
-    [schedules]
-  );
-
   return (
     <DataContext.Provider
       value={{
@@ -606,7 +488,6 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         habits,
         goals,
         notes,
-        schedules,
         loading,
         error,
         refreshAll: fetchAll,
@@ -622,9 +503,6 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         createNote,
         updateNote,
         deleteNote,
-        createSchedule,
-        updateSchedule,
-        deleteSchedule,
       }}>
       {children}
     </DataContext.Provider>

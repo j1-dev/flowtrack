@@ -77,13 +77,3 @@ export type Note = {
   updatedAt: Date;
 };
 
-export type Schedule = {
-  id: string;
-  name: string;
-  type: 'DAY' | 'WEEK';
-  userId: string;
-  user: User;
-  createdAt: Date;
-  updatedAt: Date;
-  tasks: Task[];
-};

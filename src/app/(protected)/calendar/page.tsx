@@ -13,29 +13,13 @@ import {
   CalendarViewTrigger,
   CalendarWeekView,
   CalendarYearView,
-  useCalendar,
 } from '@/components/ui/full-calendar/index';
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from '@/components/ui/select';
 import Loading from '@/components/loading';
-import { Button } from '@/components/ui/button';
-import { useUserData } from '@/components/data-context';
-import { Schedule } from '@/lib/types';
-import { ScheduleModal } from '@/components/modals/schedule-modal';
 
 const CalendarPage: FC = () => {
-  const { view, date } = useCalendar();
-  const { tasks, schedules, createSchedule, createTask } = useUserData();
   const { status } = useSession();
   const router = useRouter();
-  const [open, setOpen] = useState(false);
   const [width, setWidth] = useState(0);
-  const [scheduleId, setScheduleId] = useState<string>('');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -53,58 +37,6 @@ const CalendarPage: FC = () => {
 
     return () => window.removeEventListener('resize', handleResize);
   }, [status, router]);
-
-  const handleLoad = (ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    ev.preventDefault();
-    const selectedSchedule = schedules.find(
-      (element) => element.id === scheduleId
-    );
-    const selectedScheduleTasks = selectedSchedule?.tasks;
-    selectedScheduleTasks?.map((task) => {
-      task.start = new Date(task.start);
-      task.end = new Date(task.end);
-      task.start.setFullYear(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate()
-      );
-      task.end.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
-      task.id = '';
-    });
-    selectedScheduleTasks?.map((task) => {
-      console.log('creating task: ', task);
-      createTask(task);
-    });
-  };
-
-  const handleSave = async ({ name }: Schedule) => {
-    const selectedDay = date;
-    const selectedDayStart = new Date(selectedDay.setHours(0, 0, 0, 0));
-    const selectedDayEnd = new Date(selectedDay.setHours(23, 59, 59, 99));
-
-    const filteredTasks = tasks.filter(
-      (task) => task.start > selectedDayStart && task.start < selectedDayEnd
-    );
-
-    const baseTasks = filteredTasks.map((task) => ({
-      ...task,
-      id: '',
-      start: new Date(task.start),
-      end: new Date(task.end),
-    }));
-
-    baseTasks.forEach((baseTask) => {
-      baseTask.start.setFullYear(1975, 0, 1);
-      baseTask.end.setFullYear(1975, 0, 1);
-    });
-
-    const createdTasks = await Promise.all(
-      baseTasks.map((task) => createTask(task))
-    );
-    const selectedTasksIds = createdTasks.map((task) => task.id);
-
-    await createSchedule(name, view.toUpperCase(), selectedTasksIds);
-  };
 
   if (status === 'loading') {
     return <Loading text="Loading Calendar..." />;
@@ -201,32 +133,6 @@ const CalendarPage: FC = () => {
                 <CalendarCurrentDate />
               </span>
             </div>
-          </div>
-          <div className="mb-4">
-            <Select onValueChange={(value) => setScheduleId(value)}>
-              <SelectTrigger className="w-32 inline-flex mt-1 mr-3">
-                <SelectValue placeholder="Schedule" />
-              </SelectTrigger>
-              <SelectContent>
-                {schedules.map((schedule) => (
-                  <SelectItem key={schedule.id} value={schedule.id}>
-                    {schedule.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={(ev) => handleLoad(ev)}>Load Schedule</Button>
-            <Button
-              variant="outline"
-              onClick={() => setOpen(true)}
-              className="ml-2">
-              Save Schedule
-            </Button>
-            <ScheduleModal
-              open={open}
-              onClose={() => setOpen(false)}
-              onSave={handleSave}
-            />
           </div>
 
           {/* Calendar views container - responsive height */}
