@@ -3,9 +3,12 @@ import { setHours } from 'date-fns';
 import { useCalendar } from './Calendar';
 import EventGroup from './EventGroup';
 import TimeTable from './TimeTable';
+import HabitIndicator from './HabitIndicator';
+import { useUserData } from '@/components/data-context';
 
 const CalendarDayView = () => {
   const { view, events, date, onCreateAtTime, onEventDrop } = useCalendar();
+  const { habits } = useUserData();
   const [cursorY, setCursorY] = useState<number | null>(null);
   const [dragOverY, setDragOverY] = useState<number | null>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
@@ -149,12 +152,14 @@ const CalendarDayView = () => {
             />
           )}
           {hours.map((hour) => (
-            <EventGroup
-              key={hour.toString()}
-              hour={hour}
-              events={events}
-              calendarRef={calendarRef}
-            />
+            <div key={hour.toString()} className="relative">
+              <EventGroup
+                hour={hour}
+                events={events}
+                calendarRef={calendarRef}
+              />
+              <HabitIndicator habits={habits} hour={hour} maxOccurrences={10} />
+            </div>
           ))}
         </div>
       </div>
